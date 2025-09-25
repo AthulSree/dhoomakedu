@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Performance Report</title>
+    <style>
+        body {
+            font-family: sans-serif !important;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+        .inline-section {
+            display: flex;
+            justify-content: space-between !important;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .footer {
+            margin-top: 20px;
+        }
+
+       .row {
+        display: grid;
+        grid-template-columns: 2fr 2fr 2fr 3fr 3fr; /* must total 12 parts like bootstrap */
+        align-items: center;
+        margin-bottom: 15px;
+        font-weight:bold;
+      }
+
+      .rowBtm {
+        display: grid;
+        grid-template-columns: 2fr 2fr 2fr 2fr 5fr; /* must total 12 parts like bootstrap */
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      .col {
+        padding: 4px 8px;
+      }
+      .text-end {
+        text-align: right;
+      }
+      .text-begin {
+        text-align: left;
+      }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1><u>Monthly Performance Report</u></h1>
+</div>
+<br><br>
+
+
+<div class="row">
+    <div class="col"><strong>Project No :</strong></div>
+    <div class="col" th:text="${empProjNo}"></div>
+    <div class="col"></div>
+    <div class="col text-end"><strong>MPR for the Month :</strong></div>
+    <div class="col" th:text="${empMonthPeriod}"></div>
+</div>
+<div class="row">
+    <div class="col"><strong>Work Order No :</strong></div>
+    <div class="col" th:text="${empWorkOrdr}"></div>
+</div>
+
+<br><br><br>
+
+<table>
+    <thead>
+    <tr>
+        <th rowspan="2">Sl no</th>
+        <th rowspan="2">Name</th>
+        <th rowspan="2">Designation</th>
+        <th rowspan="2">Date of Joining</th>
+        <th colspan="2" style="text-align:center">Working Period</th>
+        <th rowspan="2">Absent</th>
+    </tr>
+    <tr>
+        <th>From</th>
+        <th>To</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>1</td>
+        <td th:text="${empName}"></td>
+        <td th:text="${empDesign}"></td>
+        <td th:text="${empJoinDate}"></td>
+        <td th:text="${empFromDate}"></td>
+        <td th:text="${empToDate}"></td>
+        <td th:text="${empAbsentCnt}" style="text-align:center"></td>
+
+
+    </tr>
+    </tbody>
+</table>
+
+<br><br>
+
+<div class="section">
+    <strong>Performance of the above Resource found satisfactory</strong>
+</div>
+
+<br><br><br><br><br><br><br><br>
+
+<div class="rowBtm">
+    <div class="col"></div>
+    <div class="col"></div>
+    <div class="col"></div>
+    <div class="col"></div>
+    <div class="col text-begin"><strong>Signature with date of the Reporting officer with Stamp</strong></div>
+</div>
+
+
+</body>
+</html>

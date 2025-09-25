@@ -1,0 +1,4 @@
+
+$(function(){
+    $("#hostdd").select2();
+})

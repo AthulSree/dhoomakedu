@@ -1,0 +1,184 @@
+<html layout:decorate="~{base}">
+
+<div layout:fragment="content">
+
+    <style>
+        .dialogue-container {
+          position: fixed;
+          right: 0px;
+          bottom: 0px;
+          display: flex;
+          align-items: flex-end;
+          gap: 10px;
+          z-index: 9999;
+          opacity: 0;
+          transform: translateY(10px);
+          transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .dialogue-container.show {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .dialogue-bubble {
+          background: rgba(20, 20, 25, 0.9);
+          color: #fff;
+          padding: 10px 14px;
+          border-radius: 12px;
+          max-width: 240px;
+          font-size: 14px;
+          line-height: 1.4;
+          position: relative;
+          bottom:20px;
+        }
+
+        .dialogue-bubble::after {
+          content: "";
+          position: absolute;
+          bottom: 10px;
+          right: -18px;
+          border-width: 8px;
+          border-style: solid;
+          border-color: transparent transparent transparent rgba(20,20,25,0.9);
+        }
+
+        .dialogue-character {
+          width: 100px;
+          height: auto;
+        }
+
+        .text-green {
+            color: #008000bf;
+            font-weight: bold;
+        }
+        .text-red {
+            color: #921e1e;
+            font-weight: bold;
+        }
+    </style>
+
+
+
+
+
+    <!-- ✅ Frosted Glass Form -->
+    <div class="frost-form-wrapper frost-glass" style="width:25em">
+        <h2 class="frost-form-title">🐐 your Leaves </h2>
+        <form class="frost-form" action="#" th:action="@{/leaves/saveLeave}" th:object="${leaveObj}"  method="POST" enctype="multipart/form-data">
+
+            <input type="hidden" th:field="*{id}" />
+            <input type="hidden" th:field="*{leaveMpMonth}" />
+            <input type="hidden" th:field="*{leaveMpYear}" />
+
+            <div class="frost-form-row" style="display: flex; gap: 20px;">
+                <div class="frost-form-group"  style="flex: 1;">
+                    <label class="frost-form-label" for="name">Name</label>
+                    <select class="form-select frost-form-input" aria-label="Default select example" id="name"
+                            th:field="*{empId}" required>
+                        <option th:each="emp : ${emp_list}"
+                                th:value="${emp.id}"
+                                th:text="${emp.first_name}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="frost-form-group">
+                <label class="frost-form-label" for="leaveStr">Leaves (comma separated dd/d is enough)</label>
+                <input class="frost-form-input" type="text" id="leaveStr" th:field="*{leaveStr}" required>
+            </div>
+
+            <div class="frost-form-group">
+                <label class="frost-form-label" for="halfDayLeaveCnt">day/2 leave count (nannayi aaloichitt mathram)</label>
+                <input class="frost-form-input" type="number" id="halfDayLeaveCnt" th:field="*{halfDayLeaveCnt}" >
+            </div>
+
+            <div class="frost-form-group">
+                <label class="frost-form-label" for="atSideA">Attendence Side:1</label>
+                <input class="frost-form-input" type="file" id="atSideA" th:field="*{atSideA}" multiple>
+            </div>
+
+            <div class="frost-form-group">
+                <label class="frost-form-label" for="atSideB">Attendence Side:2</label>
+                <input class="frost-form-input" type="file" id="atSideB" th:field="*{atSideB}" multiple>
+            </div>
+
+            <div class="frost-form-actions">
+                <button type="submit" class="frost-form-btn frost-btn-primary">Save</button>
+                <button type="reset" class="frost-form-btn frost-btn-secondary">Reset</button>
+            </div>
+        </form>
+    </div>
+
+
+    <!-- ✅ Table -->
+    <div class="frost-table-wrapper">
+        <div class="row" style="margin-bottom: 15px;">
+            <div class="col-4 d-flex">
+                <h1 class="frost-table-title">Leave List</h1>
+            </div>
+            <div class="col-8 d-flex justify-content-end">
+                <form class="frost-form" th:action="@{/leaves/changeMonth}" th:object="${monthObj}" method="POST" >
+                    <select class="form-select frost-form-input w-auto" id="monthPicker" name="month" onchange="this.form.submit()">
+                        <option th:each="month : ${lastThreeMonths}"
+                                th:value="${month.value}"
+                                th:text="${month.label}"
+                                th:selected="${month.value == setMonth.month + '*' + setMonth.Year}">
+                        </option>
+                    </select>
+                </form>
+            </div>
+        </div>
+        <div class="frost-glass" style="width:55em">
+            <div class="frost-table-scroll">
+                <table class="frost-table">
+                    <thead>
+                    <tr>
+                        <th style="width:7%">Sl</th>
+                        <th style="width:18%">Employee</th>
+                        <th style="width:14%">Leaves</th>
+                        <th style="width:14%">Day/2 Leaves</th>
+                        <th style="width:18%">@ Side 1</th>
+                        <th style="width:18%">@ Side 2</th>
+                        <th style="width:25%">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="temp_leli, iterstat : ${leavesList}">
+                        <th class="sticky-col" th:text="${iterstat.count}"></th>
+                        <td th:text="${temp_leli.empId.first_name}"></td>
+                        <td th:text="${temp_leli.leaveStr}"></td>
+                        <td th:text="${temp_leli.halfDayLeaveCnt}"></td>
+                        <td th:text="${temp_leli.atSideA.length > 0 ? 'Kitti-Bodhichu' : 'It`s OK Alla'}"  th:class="${temp_leli.atSideA.length > 0 ? 'text-green' : 'text-red'}"></td>
+                        <td th:text="${temp_leli.atSideB.length > 0 ? 'Kitti-Bodhichu' : 'Its OK Alla'}"  th:class="${temp_leli.atSideB.length > 0 ? 'text-green' : 'text-red'}"></td>
+                        <td>
+                            <a th:href="@{/leaves/updateForm(leaveId=${temp_leli.id})}"
+                               class="btn btn-info btn-sm">
+                                Update
+                            </a>
+
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!--    Shammy appears -->
+    <div id="dialogueBox" class="dialogue-container">
+        <div class="dialogue-bubble">
+            Paranjille mone, comma separated dd mathram mathyenn..ehh..idi veno
+        </div>
+        <img th:src="@{/img/shammy1.png}" alt="character" class="dialogue-character">
+    </div>
+
+
+
+<script th:src="@{/js/leaves.js}"></script>
+
+</div>
+</html>

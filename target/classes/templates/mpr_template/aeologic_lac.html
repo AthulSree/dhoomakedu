@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monthly Performance Report</title>
+  <style>
+    body {
+        font-family: sans-serif !important;
+        margin: 25px;
+    }
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .section {
+        margin-bottom: 20px;
+    }
+    .section label {
+        display: inline-block;
+        width: 150px;
+        font-weight: bold;
+    }
+    .inline-section {
+        display: flex;
+        justify-content: space-between !important;
+        margin-bottom: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    th, td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .footer {
+        margin-top: 20px;
+    }
+
+   .row {
+    display: grid;
+    grid-template-columns: 3fr 1fr 2fr 3fr 3fr; /* must total 12 parts like bootstrap */
+    align-items: center;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+
+  .rowBtm {
+    display: grid;
+    grid-template-columns: 2fr 2fr 2fr 2fr 5fr; /* must total 12 parts like bootstrap */
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  .col {
+    padding: 4px 8px;
+  }
+  .text-end {
+    text-align: right;
+  }
+  .text-begin {
+    text-align: left;
+  }
+   p {
+    line-height: 1.8; /* more spacing between lines */
+   }
+  </style>
+</head>
+<body>
+<div class="header">
+  <h3><u>Leave Adjustment Certificate</u></h3>
+</div>
+<br><br>
+
+
+<div class="row">
+  <div class="col"><strong>Project No :</strong></div>
+  <div class="col" th:text="${empProjNo}"></div>
+</div>
+<div class="row">
+  <div class="col"><strong>Work Order No :</strong></div>
+  <div class="col" th:text="${empWorkOrdr}"></div>
+</div>
+
+<br><br>
+
+<p>This letter certifies that Mr/Mrs
+  <u>&nbsp;&nbsp;&nbsp;&nbsp;<span th:text="${empName}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</u>
+  has taken <u>&nbsp;&nbsp;&nbsp;&nbsp;<span th:text="${leaveCnt}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</u>
+  day(s) leave on <span th:text="${leaveDates}"></span>.
+</p>
+
+
+<p>The above mentioned leaves has been approved and requested to adjust the same if candidate is having pending leaves in his/her account</p>
+
+
+<br><br><br><br><br><br><br><br>
+
+<div class="rowBtm">
+  <div class="col"></div>
+  <div class="col"></div>
+  <div class="col"></div>
+  <div class="col"></div>
+  <div class="col text-begin"><strong>Signature with date of the Reporting officer with Stamp</strong></div>
+</div>
+
+
+</body>
+</html>

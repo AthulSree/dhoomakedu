@@ -1,0 +1,37 @@
+<html layout:decorate="~{base}">
+<div layout:fragment="content">
+
+
+
+
+    <div class="frost-form-wrapper frost-glass" style="width:auto">
+        <h2 class="frost-form-title"> 🕊️ Nēnu nīke Dūtanu </h2>
+        <form class="frost-form" action="#" th:action="@{/message/sendMsg}"  method="POST">
+
+            <div class="frost-form-row" style="display: flex; gap: 20px;">
+                <div class="frost-form-group" style="flex:1">
+                    <label class="frost-form-label" for="msgContainer">Type your msg</label>
+                    <textarea class="frost-form-input" name="msgContainer"></textarea>
+                <br>
+                    <label class="frost-form-label" for="name">Select Recepients</label>
+                    <select class="form-select frost-form-input" aria-label="Default select example" name="hostId" id="hostdd" required multiple>
+                        <option th:each="host : ${groupHosts}"
+                                th:value="${host.id}"
+                                th:text="${host.userName}">
+                        </option>
+                    </select>
+                    <br>
+                </div>
+            </div>
+
+            <div class="frost-form-actions">
+                <button type="submit" class="frost-form-btn frost-btn-primary"><i class="fa fa-paper-plane" aria-hidden="true"></i> Send</button>
+            </div>
+
+        </form>
+    </div>
+
+<script th:src="@{/js/msgLander.js}"></script>
+
+</div>
+</html>

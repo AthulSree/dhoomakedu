@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--  <link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">-->
+  <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
+  <title>Gravity of Brahm-o-suki</title>
+  <!-- Bootstrap 5 CSS CDN -->
+
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"  crossorigin="anonymous">
+    <link th:href="@{/css/cosmic_style.css}" rel="stylesheet" >
+    <link th:href="@{/css/select2min.css}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+    <script th:src="@{/js/fafa.js}" crossorigin="anonymous"></script>
+
+</head>
+<body>
+<!-- Background with stars, dust, comets, meteors, UFOs, satellite, moon, nebulae, and rocket -->
+<div class="background-container">
+  <div class="nebula"></div>
+  <div class="nebula"></div>
+  <div class="stars"></div>
+  <div class="stars2"></div>
+  <div class="stars3"></div>
+  <div class="stars4"></div>
+  <div class="stars5"></div>
+  <div class="stars6"></div>
+  <div class="stars7"></div>
+  <div class="stars8"></div>
+  <div class="dust"></div>
+  <div class="dust2"></div>
+  <div class="dust3"></div>
+  <span class="comet"></span>
+  <span class="comet"></span>
+  <span class="comet"></span>
+  <span class="comet"></span>
+  <span class="comet"></span>
+  <span class="comet"></span>
+  <span class="comet"></span>
+  <span class="comet"></span>
+  <span class="meteor"></span>
+  <span class="meteor"></span>
+  <span class="meteor"></span>
+  <span class="ufo"></span>
+  <span class="ufo"></span>
+  <span class="ufo"></span>
+  <span class="satellite"></span>
+  <span class="satellite"></span>
+  <span class="moon"></span>
+  <span class="rocket"></span>
+</div>
+
+<!-- Cards with icons using Bootstrap grid -->
+<!-- <h4>Welcome to the world of Brahmosuki</h4><br> -->
+<div class="logo">
+  <div class="cosmic-bg"></div>
+  <a th:href="@{/}"><img th:src="@{/img/dk_logo5.png}" alt="Logo"></a>
+
+</div>
+
+<script th:src="@{/js/jquery.min.js}"></script>
+<script th:src="@{/js/select2.min.js}"></script>
+
+<div class="container" style="margin:10em !important" layout:fragment="content">
+</div>
+
+
+<!-- Bootstrap 5 JS CDN (for potential interactivity, optional) -->
+<script th:src="@{/js/bootstrap.bundle.min.js}" crossorigin="anonymous"></script>
+
+<!-- Include Orbitron font for rocket smoke -->
+
+</body>
+</html>

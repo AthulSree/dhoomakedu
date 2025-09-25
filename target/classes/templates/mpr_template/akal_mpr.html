@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Performance Report</title>
+    <style>
+        body {
+            font-family: sans-serif !important;
+            font-size:16px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+        .inline-section {
+            display: flex;
+            justify-content: space-between !important;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .footer {
+            margin-top: 20px;
+        }
+
+       .row {
+        display: grid;
+        grid-template-columns: 2fr 2fr 2fr 2fr 3fr; /* must total 12 parts like bootstrap */
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .rowBtm {
+        display: grid;
+        grid-template-columns: 2fr 2fr 2fr 2fr 5fr; /* must total 12 parts like bootstrap */
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      .col {
+        padding: 4px 8px;
+      }
+      .text-end {
+        text-align: right;
+      }
+      .text-begin {
+        text-align: left;
+      }
+    </style>
+</head>
+<body>
+<div class="row">
+    <div class="col"></div>
+    <div class="col"></div>
+    <div class="col"></div>
+    <div class="col"></div>
+    <div class="col text-begin"><strong th:text="| Date: ${currentDate} |"></strong></div>
+</div>
+
+<p>
+    <strong>To,</strong><br>
+    <strong>Vendor Name: AKAL Information Systems Limited,</strong><br>
+    <strong>Vendor Address: N-161A, Saira Tower, Gulmohar Enclave Community Center,Yusuf Sarai,</strong><br>
+    <strong>New Delhi-110049</strong>
+</p>
+<p>
+    <strong>
+        <u>Subject:-</u> Monthly Service Performance Report for the month of
+        <span th:text="${empMonth}"></span>
+        against NICSI <br>
+        Work Order. No: <span th:text="${empWorkOrdr}"></span> &nbsp;&nbsp;&nbsp;
+        Dated: <span th:text="${empJoinDateMonthAbb}"></span> &nbsp;&nbsp;&nbsp;
+        under the Project No: <span th:text="${empProjNo}"></span>
+    </strong>
+</p>
+
+<br>
+
+<p> Sir/Madam,</p>
+ <p>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In reference to aforesaid work-order issued by NICSI-New Delhi, the performance of the services provided by your firm during the period mentioned is as under :-
+</p>
+<br>
+<table style="font-size:14.5px !important">
+    <thead>
+    <tr>
+        <th rowspan="2">S. No</th>
+        <th rowspan="2">Designation</th>
+        <th rowspan="2">Qty</th>
+        <th colspan="2" style="text-align:center">Service Period</th>
+        <th colspan="4" style="text-align:center">Service Performance Details</th>
+    </tr>
+    <tr>
+        <th style="text-align:center">From</th>
+        <th style="text-align:center">To</th>
+        <th style="text-align:center">Candidate Name</th>
+        <th style="text-align:center">Project Manager Name</th>
+        <th style="text-align:center">Leave (CL Only)</th>
+        <th style="text-align:center">Overall Performance Remarks (Satisfactory/<br> un-satisfactory)</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="text-align:center">1</td>
+            <td th:text="${empDesign}"></td>
+            <td style="text-align:center">1</td>
+            <td th:text="${empFromDate}"></td>
+            <td th:text="${empToDate}"></td>
+            <td th:text="${empName}"></td>
+            <td th:text="${proj_manager}"></td>
+            <td th:text="${empAbsentCnt}" style="text-align:center"></td>
+            <td>Satisfactory</td>
+
+        </tr>
+    </tbody>
+</table>
+
+<br><br>
+
+    <div class="rowBtm">
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col text-begin"><strong>Name:</strong></div>
+    </div>
+    <div class="rowBtm">
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col text-begin"><strong>Designation:</strong></div>
+    </div>
+<br><br><br><br>
+    <div class="rowBtm">
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col text-begin"><strong>Signature & Stamp</strong></div>
+    </div>
+
+</body>
+</html>
+

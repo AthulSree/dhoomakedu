@@ -1,0 +1,101 @@
+
+
+<html layout:decorate="~{base}">
+
+<div layout:fragment="content">
+
+  <style>
+
+    .astro-error-card {
+    background: #0d1b2a;
+    color: #e0e6ed;
+    border: 2px solid #ff4d4d;
+    border-radius: 12px;
+    width: 1000px;
+    padding: 16px;
+    box-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
+    font-family: 'Orbitron', sans-serif; /* optional sci-fi font */
+  }
+
+  .error-header {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ff4d4d;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+
+  .error-icon {
+    font-size: 24px;
+    margin-right: 8px;
+  }
+
+  .error-title {
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #ff4d4d;
+  }
+
+  .error-body p {
+    margin: 6px 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .error-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .retry-btn, .abort-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .retry-btn {
+    background: #1a3d5d;
+    color: #e0e6ed;
+  }
+
+  .retry-btn:hover {
+    background: #28597a;
+  }
+
+  .abort-btn {
+    background: #ff4d4d;
+    color: white;
+  }
+
+  .abort-btn:hover {
+    background: #e60000;
+  }
+
+  </style>
+
+
+  <div class="astro-error-card">
+    <div class="error-header">
+      <span class="error-icon">⚠️</span>
+      <span class="error-title">System Alert</span>
+    </div>
+    <div class="error-body">
+      <p><strong>Module:</strong> Navigation Thrusters</p>
+      <p><strong>Error Code:</strong> NAV-404</p>
+      <p><strong>Message:</strong> <p th:text="${message}"></p></p>
+    </div>
+    <div class="error-footer">
+      <button class="retry-btn">Retry</button>
+      <button class="abort-btn">Abort Mission</button>
+    </div>
+  </div>
+
+</div>
+</html>

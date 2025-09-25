@@ -1,0 +1,129 @@
+<html layout:decorate="~{base}" xmlns="http://www.w3.org/1999/html">
+<div layout:fragment="content">
+
+    <style>
+        /* Grid Layout */
+        .card-grid {
+          display: grid;
+          grid-template-columns: repeat(6, 1fr); /* was 250px */
+          gap: 0.75rem; /* was 1rem */
+          padding: 0.5rem;
+        }
+
+        /* Card */
+        .frost-card {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .frost-card.has-leave {
+          box-shadow: 0 2px 8px rgba(0, 200, 0, 0.6); /* green */
+        }
+
+        .frost-card.no-leave {
+          box-shadow: 0 2px 8px rgba(200, 0, 0, 0.6); /* red */
+        }
+
+        /* Circle with initials */
+        .circle {
+            width: 5rem;
+            height: 5rem;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Name */
+        .card-name {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: slategray; /* 👈 converted your request */
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s ease;
+        }
+
+        .btn-mpr {
+            background: rgba(59, 130, 246, 0.7);
+        }
+
+        .btn-mpr:hover {
+            background: rgba(59, 130, 246, 1);
+        }
+
+        .btn-lac {
+            background: rgba(34, 197, 94, 0.7);
+        }
+
+        .btn-lac:hover {
+            background: rgba(34, 197, 94, 1);
+        }
+
+        .btn-att {
+            background: linear-gradient(45deg, #232526, #414345);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .btn-att:hover {
+            transform: scale(1.05);
+        }
+    </style>
+
+    <div class="card-grid">
+        <div class="frost-card"
+             th:each="emp : ${empMprData}"
+             th:classappend="${emp.leaveList == null} ? ' no-leave' : ' has-leave'">
+
+            <div class="circle" th:text="${emp.firstName.substring(0,1)} + ${emp.lastName.substring(0,1)}"></div>
+            <p class="card-name" th:text="${emp.firstName} + ' ' + ${emp.lastName}"></p>
+
+            <div class="btn-group">
+                <button class="btn btn-mpr" th:onclick="|window.location='@{/pdf/genz(empId=${emp.empId})}'|">MPR</button>
+                <button class="btn btn-lac" th:if="${emp.agency == 'AEOLOGIC'}" th:onclick="|window.location='@{/pdf/lacGenz(empId=${emp.empId})}'|">LAC</button>
+            </div>
+
+            <div class="btn-group mt-1">
+                <button class="btn btn-att"  th:if="${emp.at1 == 'Y'.charAt(0)}" th:onclick="|window.location='@{/leaves/fileGenz(empId=${emp.empId}, atSide=sideA)}'|">@-1</button>
+                <button class="btn btn-att" th:if="${emp.at2 == 'Y'.charAt(0)}"  th:onclick="|window.location='@{/leaves/fileGenz(empId=${emp.empId}, atSide=sideB)}'|">@-2</button>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+</html>

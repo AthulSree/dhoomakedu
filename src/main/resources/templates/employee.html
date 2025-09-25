@@ -1,0 +1,99 @@
+<html layout:decorate="~{base}">
+
+<div layout:fragment="content">
+
+    <!-- Frosted Glass Form -->
+    <div class="frost-form-wrapper frost-glass">
+        <h2 class="frost-form-title">New Astro ?</h2>
+        <form class="frost-form" action="#" th:action="@{/employee/save_employee}" th:object="${employee}" method="POST">
+
+            <input type="hidden" th:field="*{id}" />
+
+            <div class="frost-form-group">
+                <label class="frost-form-label" for="name">First Name</label>
+                <input class="frost-form-input" type="text" id="name" th:field="*{first_name}" placeholder="Enter First Name" required>
+            </div>
+
+            <div class="frost-form-group">
+                <label class="frost-form-label" for="designation">Last Name</label>
+                <input class="frost-form-input" type="text" id="designation" th:field="*{last_name}" placeholder="Enter Last Name" required>
+            </div>
+
+            <div class="frost-form-group">
+                <label class="frost-form-label" for="as_group">AS Group</label>
+                <input class="frost-form-input" type="text" id="as_group" th:field="*{as_group}" placeholder="Enter AS Group" required>
+            </div>
+
+
+            <div class="frost-form-group">
+                <label class="frost-form-label" for="as_group">Is Admin?</label>
+                <select class="form-select frost-form-input" aria-label="Default select example" th:field="*{is_admin}" required>
+                    <option value="0" selected>No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+
+            <div class="frost-form-group">
+                <label class="frost-form-label" for="as_group">System IP</label>
+                <input class="frost-form-input" type="text" id="updated_time" th:field="*{sys_ip}" placeholder="System IP Address" required>
+            </div>
+
+
+            <div class="frost-form-actions">
+                <button type="submit" class="frost-form-btn frost-btn-primary">Save</button>
+                <button type="reset" class="frost-form-btn frost-btn-secondary">Reset</button>
+            </div>
+        </form>
+    </div>
+
+
+<!--    List Table -->
+
+    <div class="frost-table-wrapper">
+        <h1 class="frost-table-title">Employee OnBoard — NIC</h1>
+        <p class="frost-table-lead">Input the stellar profiles of cosmic operatives</p>
+
+        <div class="frost-glass">
+            <div class="frost-table-scroll">
+                <table class="frost-table">
+                    <thead>
+                    <tr>
+                        <th style="width:6%">Sl</th>
+                        <th style="width:15%">First Name</th>
+                        <th style="width:15%">Last Name</th>
+                        <th style="width:10%">AS Group</th>
+                        <th style="width:15%">System IP</th>
+                        <th style="width:8%">Is Admin</th>
+                        <th style="width:15%">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="temp_emp, iterstat : ${employeeData}">
+                            <th class="sticky-col" th:text="${iterstat.count}"></th>
+                            <td th:text="${temp_emp.first_name}"></td>
+                            <td th:text="${temp_emp.last_name}"></td>
+                            <td th:text="${temp_emp.as_group}"></td>
+                            <td th:text="${temp_emp.sys_ip}"></td>
+                            <td th:text="${temp_emp.is_admin}"></td>
+                            <!-- Add update button/link -->
+                            <td>
+                                <a th:href="@{/employee/showFormForUpdate(employeeId=${temp_emp.id})}"
+                                   class="btn btn-info btn-sm">
+                                    Update
+                                </a>
+                                <a th:href="@{/employee/deleteEmployee(employeeId=${temp_emp.id})}"
+                                   class="btn btn-danger btn-sm">
+                                    <i class="fa-solid fa-trash fa-1x"></i>
+                                </a>
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</html>
