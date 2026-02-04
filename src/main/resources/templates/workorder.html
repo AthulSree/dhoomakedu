@@ -64,6 +64,11 @@
                     <input class="frost-form-input" type="date" id="woToDate" th:field="*{woToDate}" multiple required>
                 </div>
 
+            <div class="frost-form-group">
+                <label class="frost-form-label" for="comboLeaves">Total Combo Leaves</label>
+                <input class="frost-form-input" type="number" id="comboLeaves" th:field="*{comboLeaves}" step="0.5" required>
+            </div>
+
             <div class="frost-form-actions">
                 <button type="submit" class="frost-form-btn frost-btn-primary">Save</button>
                 <button type="reset" class="frost-form-btn frost-btn-secondary">Reset</button>
@@ -89,7 +94,8 @@
                         <th style="width:12%">Work Order No.</th>
                         <th style="width:10%">Designation</th>
                         <th style="width:9%">Join Date</th>
-                        <th style="width:24%">WO Period</th>
+                        <th style="width:20%">WO Period</th>
+                        <th style="width:5%">Combo</th>
                         <th style="width:10%">Action</th>
                     </tr>
 
@@ -108,6 +114,7 @@
                             <br>to<br>
                             <span th:text="${#temporals.format(temp_wo.woToDate, 'dd-MM-yyyy')}"></span>
                         </td>
+                        <td th:text="${temp_wo.comboLeaves}"></td>
 
                         <!-- Add update button/link -->
                         <td>

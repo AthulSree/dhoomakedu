@@ -10,22 +10,18 @@ import org.springframework.web.bind.annotation.*;
 import com.bruhmosuki.dhoomaKedu.entity.leaves;
 import com.bruhmosuki.dhoomaKedu.entity.monthPeriod;
 import com.bruhmosuki.dhoomaKedu.entity.employee;
-import org.springframework.web.multipart.MultipartFile;
 import com.bruhmosuki.dhoomaKedu.dto.leaveDto;
 import com.bruhmosuki.dhoomaKedu.service.employeeService;
 import com.bruhmosuki.dhoomaKedu.service.leavesService;
 import com.bruhmosuki.dhoomaKedu.service.commonServices;
+import com.bruhmosuki.dhoomaKedu.service.workorderService;
+import com.bruhmosuki.dhoomaKedu.entity.workorder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URLConnection;
 import java.text.DecimalFormat;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
@@ -45,13 +41,16 @@ public class leavesController {
     private employeeService theEmployeeService;
     private monthPeriodService theMonthPeriodService;
     private commonServices theCommonServices;
+    private workorderService theWorkorderService;
 
     public leavesController(leavesService theLeaveService, employeeService theEmployeeService,
-            monthPeriodService theMonthPeriodService, commonServices theCommonServices) {
+            monthPeriodService theMonthPeriodService, commonServices theCommonServices,
+            workorderService theWorkorderService) {
         this.theLeaveService = theLeaveService;
         this.theEmployeeService = theEmployeeService;
         this.theMonthPeriodService = theMonthPeriodService;
         this.theCommonServices = theCommonServices;
+        this.theWorkorderService = theWorkorderService;
     }
 
     @GetMapping("/manage")
@@ -106,6 +105,25 @@ public class leavesController {
         theSavedLeave.setAtSideA(theLeaveDto.getAtSideA().getBytes());
         theSavedLeave.setAtSideB(theLeaveDto.getAtSideB().getBytes());
 
+        // Combo Leaves Logic
+        float totalLeaves = 0;
+        if (theLeaveDto.getLeaveStr() != null && !theLeaveDto.getLeaveStr().trim().isEmpty()) {
+            totalLeaves = theLeaveDto.getLeaveStr().split(",").length;
+        }
+        totalLeaves += theLeaveDto.getHalfDayLeaveCnt() * 0.5f;
+
+        float newComboUsed = Math.max(0, totalLeaves - 1);
+
+        // Update workorder balance
+        employee emp = theEmployeeService.findById(theLeaveDto.getEmpId().getId().intValue());
+        workorder wo = theWorkorderService.findByEmpId(emp);
+
+        float delta = newComboUsed - theSavedLeave.getComboLeavesUsed();
+        wo.setComboLeaves(wo.getComboLeaves() - delta);
+        theWorkorderService.save(wo);
+
+        theSavedLeave.setComboLeavesUsed(newComboUsed);
+
         theLeaveService.save(theSavedLeave);
         return "redirect:/leaves/manage";
     }
@@ -152,20 +170,35 @@ public class leavesController {
             return ResponseEntity.notFound().build();
         }
 
-        // Calculate leave details
-        float leavesTaken = 0;
+        // Calculate total leaves actual
+        float totalLeavesActual = 0;
         String leaveStr = theLeave.getLeaveStr();
         if (leaveStr != null && !leaveStr.trim().isEmpty()) {
-            leavesTaken = leaveStr.split(",").length;
+            totalLeavesActual = leaveStr.split(",").length;
         }
-        leavesTaken += theLeave.getHalfDayLeaveCnt() * 0.5f;
-        float availableLeaves = 3.0f;
-        float pendingLeaves = availableLeaves - leavesTaken;
+        totalLeavesActual += theLeave.getHalfDayLeaveCnt() * 0.5f;
+
+        // Regular Leaves calculation (1st leave is regular)
+        float regularAvailable = 3.0f;
+        float regularTaken = Math.min(1.0f, totalLeavesActual);
+        float regularPending = regularAvailable - regularTaken;
+
+        // Combo Leaves Logic for PDF
+        workorder wo = theWorkorderService.findByEmpId(theEmployeeData);
+        float comboUsed = theLeave.getComboLeavesUsed();
+        float comboAvailable = wo.getComboLeaves() + comboUsed;
+        float comboRemaining = wo.getComboLeaves();
 
         DecimalFormat df = new DecimalFormat("0.#");
-        String footerText = "Available Leaves : " + df.format(availableLeaves) + "\n" +
-                "Leaves taken : " + df.format(leavesTaken) + "\n" +
-                "Pending Leaves :" + df.format(pendingLeaves);
+        String footerText = "Available Leaves : " + df.format(regularAvailable) + "\n" +
+                "Leaves taken : " + df.format(regularTaken) + "\n" +
+                "Pending Leaves :" + df.format(regularPending);
+
+        if (comboAvailable > 0 || totalLeavesActual > 1) {
+            footerText += "\n\nCombo Leaves available : " + df.format(comboAvailable) + "\n" +
+                    "Combo Leaves Taken : " + df.format(comboUsed) + "\n" +
+                    "Combo leaves remaining : " + df.format(comboRemaining);
+        }
 
         // Modify PDF to add footer
         try (ByteArrayInputStream bais = new ByteArrayInputStream(atFile);

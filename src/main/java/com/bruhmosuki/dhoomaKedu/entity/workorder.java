@@ -28,7 +28,7 @@ public class workorder {
     @Column(name = "project_num", nullable = false, length = 15)
     private String projectNo;
 
-    @Column(name = "designation",nullable = false)
+    @Column(name = "designation", nullable = false)
     private String designation;
 
     @Column(name = "join_date", nullable = false)
@@ -43,15 +43,19 @@ public class workorder {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate woToDate;
 
+    @Column(name = "combo_leaves", nullable = false, columnDefinition = "FLOAT DEFAULT 0")
+    private float comboLeaves;
+
     @Column(name = "updated_time", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedTime;
 
-
     public workorder() {
     }
 
-    public workorder(Long id, employee empId, String agency, String woNumber, String projectNo, String designation, LocalDate joinDate, LocalDate woFromDate, LocalDate woToDate, LocalDateTime updatedTime) {
+    public workorder(Long id, employee empId, String agency, String woNumber, String projectNo, String designation,
+            LocalDate joinDate, LocalDate woFromDate, LocalDate woToDate, float comboLeaves,
+            LocalDateTime updatedTime) {
         this.id = id;
         this.empId = empId;
         this.agency = agency;
@@ -61,6 +65,7 @@ public class workorder {
         this.joinDate = joinDate;
         this.woFromDate = woFromDate;
         this.woToDate = woToDate;
+        this.comboLeaves = comboLeaves;
         this.updatedTime = updatedTime;
     }
 
@@ -136,6 +141,14 @@ public class workorder {
         this.woToDate = woToDate;
     }
 
+    public float getComboLeaves() {
+        return comboLeaves;
+    }
+
+    public void setComboLeaves(float comboLeaves) {
+        this.comboLeaves = comboLeaves;
+    }
+
     public LocalDateTime getUpdatedTime() {
         return updatedTime;
     }
@@ -156,6 +169,7 @@ public class workorder {
                 ", joinDate=" + joinDate +
                 ", woFromDate=" + woFromDate +
                 ", woToDate=" + woToDate +
+                ", comboLeaves=" + comboLeaves +
                 ", updatedTime=" + updatedTime +
                 '}';
     }

@@ -21,7 +21,7 @@ public class leaves {
     @Column(name = "leave_list", nullable = false, length = 100)
     private String leaveStr;
 
-    @Column(name="half_day_leave_count", nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Column(name = "half_day_leave_count", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int halfDayLeaveCnt;
 
     @Column(name = "leave_month", nullable = false)
@@ -38,9 +38,11 @@ public class leaves {
     @Column(name = "at_side_b", columnDefinition = "LONGBLOB", nullable = true)
     private byte[] atSideB;
 
+    @Column(name = "combo_leaves_used", nullable = false, columnDefinition = "FLOAT DEFAULT 0")
+    private float comboLeavesUsed;
+
     @UpdateTimestamp
     private LocalDateTime updatedTime;
-
 
     public leaves() {
     }
@@ -109,6 +111,14 @@ public class leaves {
         this.atSideB = atSideB;
     }
 
+    public float getComboLeavesUsed() {
+        return comboLeavesUsed;
+    }
+
+    public void setComboLeavesUsed(float comboLeavesUsed) {
+        this.comboLeavesUsed = comboLeavesUsed;
+    }
+
     public LocalDateTime getUpdatedTime() {
         return updatedTime;
     }
@@ -116,7 +126,6 @@ public class leaves {
     public void setUpdatedTime(LocalDateTime updatedTime) {
         this.updatedTime = updatedTime;
     }
-
 
     @Override
     public String toString() {
@@ -129,6 +138,7 @@ public class leaves {
                 ", leaveMpYear=" + leaveMpYear +
                 ", atSideA=" + Arrays.toString(atSideA) +
                 ", atSideB=" + Arrays.toString(atSideB) +
+                ", comboLeavesUsed=" + comboLeavesUsed +
                 ", updatedTime=" + updatedTime +
                 '}';
     }
