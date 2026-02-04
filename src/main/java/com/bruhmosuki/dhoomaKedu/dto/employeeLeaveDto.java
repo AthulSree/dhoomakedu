@@ -1,6 +1,5 @@
 package com.bruhmosuki.dhoomaKedu.dto;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 public class employeeLeaveDto {
@@ -14,8 +13,10 @@ public class employeeLeaveDto {
     private String agency;
     private Date joinDate;
     private String projectNum;
+    private Date woToDate;
 
-    public employeeLeaveDto(Long empId, String firstName, String lastName, String asGroup, Character at1, Character at2, String leaveList, String agency, Date joinDate, String projectNum) {
+    public employeeLeaveDto(Long empId, String firstName, String lastName, String asGroup, Character at1, Character at2,
+            String leaveList, String agency, Date joinDate, String projectNum, Date woToDate) {
         this.empId = empId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -26,6 +27,7 @@ public class employeeLeaveDto {
         this.agency = agency;
         this.joinDate = joinDate;
         this.projectNum = projectNum;
+        this.woToDate = woToDate;
     }
 
     public Long getEmpId() {
@@ -108,6 +110,14 @@ public class employeeLeaveDto {
         this.projectNum = projectNum;
     }
 
+    public Date getWoToDate() {
+        return woToDate;
+    }
+
+    public void setWoToDate(Date woToDate) {
+        this.woToDate = woToDate;
+    }
+
     @Override
     public String toString() {
         return "employeeLeaveDto{" +
@@ -121,6 +131,7 @@ public class employeeLeaveDto {
                 ", agency='" + agency + '\'' +
                 ", joinDate=" + joinDate +
                 ", projectNum='" + projectNum + '\'' +
+                ", woToDate=" + woToDate +
                 '}';
     }
 }
