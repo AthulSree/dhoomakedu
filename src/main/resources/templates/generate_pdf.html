@@ -2,128 +2,326 @@
 <div layout:fragment="content">
 
     <style>
-        /* Grid Layout */
-        .card-grid {
-          display: grid;
-          grid-template-columns: repeat(6, 1fr); /* was 250px */
-          gap: 0.75rem; /* was 1rem */
-          padding: 0.5rem;
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-blue: #60a5fa;
+            --accent-green: #34d399;
+            --accent-warning: #fbbf24;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
         }
 
-        /* Card */
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0f172a;
+            /* Deep space theme */
+            overflow: auto;
+            /* Show scrollbars only if content actually overflows */
+            height: auto !important;
+            min-height: 100vh;
+            margin: 0 !important;
+        }
+
+        /* Target the specific element with the inline style from base.html */
+        /* .container[style*="margin:10em"] {
+            margin: 0 !important;
+            min-height: 100vh !important;
+            max-width: 100% !important;
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        } */
+
+        /* Force reset for any container class */
+        .container {
+            display: block !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+        }
+
+        /* Move logo inside to avoid triggering scroll and prevent clipping */
+        .logo {
+            bottom: 30px !important;
+            left: 90px !important;
+            /* Offset for the -50% transform in the animation */
+        }
+
+        .logo img {
+            width: 140px !important;
+        }
+
+        /* Container override for better spacing */
+        .page-container {
+            margin: 0 auto !important;
+            /* padding: 4rem 2rem; */
+            max-width: 1600px;
+            width: 100%;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        /* Responsive Grid: Horizontally aligned, wraps automatically */
+        .card-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        /* Glass Card with fixed min-width for consistent sizing */
         .frost-card {
-            backdrop-filter: blur(20px);
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 1rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            flex: 0 1 240px;
+            position: relative;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 1.5rem 1rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 0.75rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
+            overflow: visible;
         }
 
-        .frost-card.has-leave {
-          box-shadow: 0 2px 8px rgba(0, 200, 0, 0.6); /* green */
+        .frost-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .frost-card.no-leave {
-          box-shadow: 0 2px 8px rgba(200, 0, 0, 0.6); /* red */
-        }
-
-        /* Circle with initials */
-        .circle {
-            width: 5rem;
-            height: 5rem;
+        /* Leave Status Indicators */
+        .leave-status {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .has-leave .leave-status {
+            background: var(--accent-green);
+            box-shadow: 0 0 12px var(--accent-green);
+        }
+
+        .no-leave .leave-status {
+            background: #ef4444;
+            box-shadow: 0 0 12px #ef4444;
+        }
+
+        /* WO Expiry Indicator */
+        .wo-warning {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--accent-warning);
+            padding: 0.5rem;
+            border-radius: 50%;
+            font-size: 1rem;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            animation: pulse 2s infinite;
+            cursor: help;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(251, 191, 36, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+            }
+        }
+
+        /* Profile Circle */
+        .profile-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1rem;
+            border: 2px solid var(--glass-border);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .frost-card:hover .profile-circle {
+            border-color: var(--accent-blue);
+            transform: scale(1.1) rotate(5deg);
         }
 
         /* Name */
-        .card-name {
-            font-size: 1.125rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
-            color: slategray; /* 👈 converted your request */
+        .emp-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.25rem;
         }
 
         /* Buttons */
-        .btn-group {
+        .btn-stack {
+            width: 100%;
             display: flex;
-            gap: 0.5rem;
+            flex-direction: column;
+            gap: 0.75rem;
         }
 
-        .btn {
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.75rem;
+        .btn-row {
+            display: flex;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        .modern-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
             font-size: 0.875rem;
-            color: white;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-            cursor: pointer;
+            font-weight: 600;
             border: none;
-            transition: background 0.2s ease;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
         }
 
         .btn-mpr {
-            background: rgba(59, 130, 246, 0.7);
-        }
-
-        .btn-mpr:hover {
-            background: rgba(59, 130, 246, 1);
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .btn-lac {
-            background: rgba(34, 197, 94, 0.7);
-        }
-
-        .btn-lac:hover {
-            background: rgba(34, 197, 94, 1);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
         .btn-att {
-            background: linear-gradient(45deg, #232526, #414345);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: transform 0.2s ease-in-out;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+        }
+
+        .modern-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
         }
 
         .btn-att:hover {
-            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 
-    <div class="card-grid">
-        <div class="frost-card"
-             th:each="emp : ${empMprData}"
-             th:classappend="${emp.leaveList == null} ? ' no-leave' : ' has-leave'">
+    <div class="page-container">
+        <div class="header-section">
+            <h1 class="header-title">Download MPR</h1>
+            <p class="header-subtitle">Manage and generate official reports for the workforce</p>
+        </div>
 
-            <div class="circle" th:text="${emp.firstName.substring(0,1)} + ${emp.lastName.substring(0,1)}"></div>
-            <p class="card-name" th:text="${emp.firstName} + ' ' + ${emp.lastName}"></p>
+        <div class="card-grid">
+            <div th:each="emp : ${empMprData}" class="frost-card"
+                th:classappend="${emp.leaveList == null} ? ' no-leave' : ' has-leave'">
 
-            <div class="btn-group">
-                <button class="btn btn-mpr" th:onclick="|window.location='@{/pdf/genz(empId=${emp.empId})}'|">MPR</button>
-                <button class="btn btn-lac" th:if="${emp.agency == 'AEOLOGIC'}" th:onclick="|window.location='@{/pdf/lacGenz(empId=${emp.empId})}'|">LAC</button>
-            </div>
+                <div class="leave-status"></div>
 
-            <div class="btn-group mt-1">
-                <button class="btn btn-att"  th:if="${emp.at1 == 'Y'.charAt(0)}" th:onclick="|window.location='@{/leaves/fileGenz(empId=${emp.empId}, atSide=sideA)}'|">@-1</button>
-                <button class="btn btn-att" th:if="${emp.at2 == 'Y'.charAt(0)}"  th:onclick="|window.location='@{/leaves/fileGenz(empId=${emp.empId}, atSide=sideB)}'|">@-2</button>
+                <!-- Next Month Expiry Indicator -->
+                <div class="wo-warning"
+                    th:if="${emp.woToDate != null && #dates.year(emp.woToDate) == T(java.time.LocalDate).now().plusMonths(1).year && #dates.month(emp.woToDate) == T(java.time.LocalDate).now().plusMonths(1).monthValue}"
+                    th:title="'Work Order expiring on ' + ${#dates.format(emp.woToDate, 'dd MMM yyyy')}">
+                    <i class="fas fa-history"></i>
+                </div>
+
+                <div class="profile-circle" th:text="${emp.firstName.substring(0,1)} + ${emp.lastName.substring(0,1)}">
+                </div>
+
+                <div class="emp-name" th:text="${emp.firstName} + ' ' + ${emp.lastName}"></div>
+
+                <div class="btn-stack">
+                    <div class="btn-row">
+                        <button class="modern-btn btn-mpr"
+                            th:onclick="|window.location='@{/pdf/genz(empId=${emp.empId})}'|">
+                            <i class="fas fa-file-pdf"></i> MPR
+                        </button>
+                        <button class="modern-btn btn-lac" th:if="${emp.agency == 'AEOLOGIC'}"
+                            th:onclick="|window.location='@{/pdf/lacGenz(empId=${emp.empId})}'|">
+                            <i class="fas fa-check-circle"></i> LAC
+                        </button>
+                    </div>
+
+                    <div class="btn-row" th:if="${emp.at1 == 'Y'.charAt(0) || emp.at2 == 'Y'.charAt(0)}">
+                        <button class="modern-btn btn-att" th:if="${emp.at1 == 'Y'.charAt(0)}"
+                            th:onclick="|window.location='@{/leaves/fileGenz(empId=${emp.empId}, atSide=sideA)}'|">
+                            <i class="fas fa-clock"></i> @-1
+                        </button>
+                        <button class="modern-btn btn-att" th:if="${emp.at2 == 'Y'.charAt(0)}"
+                            th:onclick="|window.location='@{/leaves/fileGenz(empId=${emp.empId}, atSide=sideB)}'|">
+                            <i class="fas fa-clock"></i> @-2
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-
-
 </div>
+
 </html>

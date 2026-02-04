@@ -124,7 +124,7 @@ public class PdfGeneratorController {
         context.setVariable("currentDate",today);
         
         if("ASG2".equals(asGrp)){
-            context.setVariable("proj_manager","Sreekala V.S");
+            context.setVariable("proj_manager","Anil V.S");
         }else{
             context.setVariable("proj_manager","K. Rajan");
         }

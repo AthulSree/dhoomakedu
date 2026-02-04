@@ -1,184 +1,431 @@
-<html layout:decorate="~{base}">
-
+<html layout:decorate="~{base}" xmlns="http://www.w3.org/1999/html">
 <div layout:fragment="content">
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-blue: #60a5fa;
+            --accent-green: #34d399;
+            --accent-red: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --input-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0f172a;
+            overflow-x: hidden;
+            overflow-y: auto !important;
+            height: auto !important;
+            margin: 0 !important;
+        }
+
+        .container {
+            display: block !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .page-wrapper {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Side-by-Side Layout */
+        .content-layout {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .form-side {
+            flex: 0 0 380px;
+            min-width: 320px;
+        }
+
+        .table-side {
+            flex: 1;
+            min-width: 600px;
+        }
+
+        @media (max-width: 1100px) {
+
+            .form-side,
+            .table-side {
+                flex: 1 1 100%;
+                min-width: 100%;
+            }
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-title {
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            margin-left: 0.25rem;
+        }
+
+        .glass-input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.75rem;
+            padding: 0.6rem 1rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        select.glass-input option {
+            background: #1e293b;
+            color: white;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .modern-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .modern-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        /* Table Styling */
+        .table-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 1rem;
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .modern-table th {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modern-table td {
+            padding: 1rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.9rem;
+        }
+
+        .modern-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Status Colors */
+        .status-received {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .status-missing {
+            color: var(--accent-red);
+            font-weight: 600;
+        }
+
+        /* Dialogue Box */
         .dialogue-container {
-          position: fixed;
-          right: 0px;
-          bottom: 0px;
-          display: flex;
-          align-items: flex-end;
-          gap: 10px;
-          z-index: 9999;
-          opacity: 0;
-          transform: translateY(10px);
-          transition: opacity 0.2s ease, transform 0.2s ease;
+            position: fixed;
+            right: 2rem;
+            bottom: 2rem;
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
         }
 
         .dialogue-container.show {
-          opacity: 1;
-          transform: translateY(0);
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
         }
 
         .dialogue-bubble {
-          background: rgba(20, 20, 25, 0.9);
-          color: #fff;
-          padding: 10px 14px;
-          border-radius: 12px;
-          max-width: 240px;
-          font-size: 14px;
-          line-height: 1.4;
-          position: relative;
-          bottom:20px;
+            background: #1e293b;
+            color: #fff;
+            padding: 1rem 1.25rem;
+            border-radius: 1.25rem;
+            max-width: 260px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            position: relative;
+            margin-bottom: 2.5rem;
         }
 
         .dialogue-bubble::after {
-          content: "";
-          position: absolute;
-          bottom: 10px;
-          right: -18px;
-          border-width: 8px;
-          border-style: solid;
-          border-color: transparent transparent transparent rgba(20,20,25,0.9);
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            right: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #1e293b transparent transparent;
         }
 
         .dialogue-character {
-          width: 100px;
-          height: auto;
+            width: 100px;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
         }
 
-        .text-green {
-            color: #008000bf;
-            font-weight: bold;
+        .action-link {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            background: rgba(96, 165, 250, 0.1);
+            transition: all 0.2s;
         }
-        .text-red {
-            color: #921e1e;
-            font-weight: bold;
+
+        .action-link:hover {
+            background: rgba(96, 165, 250, 0.2);
         }
     </style>
 
+    <div class="page-wrapper">
+        <header class="header-section">
+            <h1 class="header-title">Leave Management</h1>
+            <p style="color: var(--text-secondary)">Record and review employee attendance</p>
+        </header>
 
+        <div class="content-layout">
+            <!-- Left Side: Form -->
+            <aside class="form-side">
+                <div class="glass-card">
+                    <h2 class="card-title"><i class="fas fa-calendar-plus"></i> Log New Leave 🐐</h2>
+                    <form th:action="@{/leaves/saveLeave}" th:object="${leaveObj}" method="POST"
+                        enctype="multipart/form-data">
+                        <input type="hidden" th:field="*{id}" />
+                        <input type="hidden" th:field="*{leaveMpMonth}" />
+                        <input type="hidden" th:field="*{leaveMpYear}" />
 
+                        <div class="form-group">
+                            <label class="form-label">Employee</label>
+                            <select class="glass-input" th:field="*{empId}" required>
+                                <option th:each="emp : ${emp_list}" th:value="${emp.id}" th:text="${emp.first_name}">
+                                </option>
+                            </select>
+                        </div>
 
+                        <div class="form-group">
+                            <label class="form-label">Absent Dates (e.g. 5, 12, 18)</label>
+                            <input class="glass-input" type="text" th:field="*{leaveStr}" required
+                                placeholder="dd, dd, ...">
+                        </div>
 
-    <!-- ✅ Frosted Glass Form -->
-    <div class="frost-form-wrapper frost-glass" style="width:25em">
-        <h2 class="frost-form-title">🐐 your Leaves </h2>
-        <form class="frost-form" action="#" th:action="@{/leaves/saveLeave}" th:object="${leaveObj}"  method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label class="form-label">Day/2 Count (Aaloichitt mathram)</label>
+                            <input class="glass-input" type="number" th:field="*{halfDayLeaveCnt}" step="0.5">
+                        </div>
 
-            <input type="hidden" th:field="*{id}" />
-            <input type="hidden" th:field="*{leaveMpMonth}" />
-            <input type="hidden" th:field="*{leaveMpYear}" />
+                        <div class="form-group">
+                            <label class="form-label">Record Side:1</label>
+                            <input class="glass-input" type="file" th:field="*{atSideA}" multiple>
+                        </div>
 
-            <div class="frost-form-row" style="display: flex; gap: 20px;">
-                <div class="frost-form-group"  style="flex: 1;">
-                    <label class="frost-form-label" for="name">Name</label>
-                    <select class="form-select frost-form-input" aria-label="Default select example" id="name"
-                            th:field="*{empId}" required>
-                        <option th:each="emp : ${emp_list}"
-                                th:value="${emp.id}"
-                                th:text="${emp.first_name}">
-                        </option>
-                    </select>
+                        <div class="form-group">
+                            <label class="form-label">Record Side:2</label>
+                            <input class="glass-input" type="file" th:field="*{atSideB}" multiple>
+                        </div>
+
+                        <div class="btn-row">
+                            <button type="submit" class="modern-btn btn-save"><i class="fas fa-save"></i> Save</button>
+                            <button type="reset" class="modern-btn btn-reset"><i class="fas fa-undo"></i> Reset</button>
+                        </div>
+                    </form>
                 </div>
-            </div>
+            </aside>
 
-            <div class="frost-form-group">
-                <label class="frost-form-label" for="leaveStr">Leaves (comma separated dd/d is enough)</label>
-                <input class="frost-form-input" type="text" id="leaveStr" th:field="*{leaveStr}" required>
-            </div>
-
-            <div class="frost-form-group">
-                <label class="frost-form-label" for="halfDayLeaveCnt">day/2 leave count (nannayi aaloichitt mathram)</label>
-                <input class="frost-form-input" type="number" id="halfDayLeaveCnt" th:field="*{halfDayLeaveCnt}" >
-            </div>
-
-            <div class="frost-form-group">
-                <label class="frost-form-label" for="atSideA">Attendence Side:1</label>
-                <input class="frost-form-input" type="file" id="atSideA" th:field="*{atSideA}" multiple>
-            </div>
-
-            <div class="frost-form-group">
-                <label class="frost-form-label" for="atSideB">Attendence Side:2</label>
-                <input class="frost-form-input" type="file" id="atSideB" th:field="*{atSideB}" multiple>
-            </div>
-
-            <div class="frost-form-actions">
-                <button type="submit" class="frost-form-btn frost-btn-primary">Save</button>
-                <button type="reset" class="frost-form-btn frost-btn-secondary">Reset</button>
-            </div>
-        </form>
-    </div>
-
-
-    <!-- ✅ Table -->
-    <div class="frost-table-wrapper">
-        <div class="row" style="margin-bottom: 15px;">
-            <div class="col-4 d-flex">
-                <h1 class="frost-table-title">Leave List</h1>
-            </div>
-            <div class="col-8 d-flex justify-content-end">
-                <form class="frost-form" th:action="@{/leaves/changeMonth}" th:object="${monthObj}" method="POST" >
-                    <select class="form-select frost-form-input w-auto" id="monthPicker" name="month" onchange="this.form.submit()">
-                        <option th:each="month : ${lastThreeMonths}"
-                                th:value="${month.value}"
+            <!-- Right Side: Table -->
+            <main class="table-side">
+                <div class="table-header-row">
+                    <h2 class="card-title" style="margin: 0;"><i class="fas fa-list-ul"></i> Attendance Log</h2>
+                    <form th:action="@{/leaves/changeMonth}" th:object="${monthObj}" method="POST">
+                        <select class="glass-input" style="width: auto; padding-right: 2rem;" name="month"
+                            onchange="this.form.submit()">
+                            <option th:each="month : ${lastThreeMonths}" th:value="${month.value}"
                                 th:text="${month.label}"
                                 th:selected="${month.value == setMonth.month + '*' + setMonth.Year}">
-                        </option>
-                    </select>
-                </form>
-            </div>
-        </div>
-        <div class="frost-glass" style="width:55em">
-            <div class="frost-table-scroll">
-                <table class="frost-table">
-                    <thead>
-                    <tr>
-                        <th style="width:7%">Sl</th>
-                        <th style="width:18%">Employee</th>
-                        <th style="width:14%">Leaves</th>
-                        <th style="width:14%">Day/2 Leaves</th>
-                        <th style="width:18%">@ Side 1</th>
-                        <th style="width:18%">@ Side 2</th>
-                        <th style="width:25%">Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="temp_leli, iterstat : ${leavesList}">
-                        <th class="sticky-col" th:text="${iterstat.count}"></th>
-                        <td th:text="${temp_leli.empId.first_name}"></td>
-                        <td th:text="${temp_leli.leaveStr}"></td>
-                        <td th:text="${temp_leli.halfDayLeaveCnt}"></td>
-                        <td th:text="${temp_leli.atSideA.length > 0 ? 'Kitti-Bodhichu' : 'It`s OK Alla'}"  th:class="${temp_leli.atSideA.length > 0 ? 'text-green' : 'text-red'}"></td>
-                        <td th:text="${temp_leli.atSideB.length > 0 ? 'Kitti-Bodhichu' : 'Its OK Alla'}"  th:class="${temp_leli.atSideB.length > 0 ? 'text-green' : 'text-red'}"></td>
-                        <td>
-                            <a th:href="@{/leaves/updateForm(leaveId=${temp_leli.id})}"
-                               class="btn btn-info btn-sm">
-                                Update
-                            </a>
+                            </option>
+                        </select>
+                    </form>
+                </div>
 
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+                <div class="glass-card" style="padding: 1rem;">
+                    <div class="table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>Employee</th>
+                                    <th>Days</th>
+                                    <th>D/2</th>
+                                    <th>Side 1</th>
+                                    <th>Side 2</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="temp_leli, iterstat : ${leavesList}">
+                                    <td th:text="${iterstat.count}"
+                                        style="color: var(--text-secondary); font-weight: 600;"></td>
+                                    <td th:text="${temp_leli.empId.first_name}" style="font-weight: 600;"></td>
+                                    <td th:text="${temp_leli.leaveStr}"></td>
+                                    <td th:text="${temp_leli.halfDayLeaveCnt ?: '0'}"></td>
+                                    <td th:text="${temp_leli.atSideA.length > 0 ? 'Kitti-Bodhichu' : 'Its OK Alla'}"
+                                        th:class="${temp_leli.atSideA.length > 0 ? 'status-received' : 'status-missing'}">
+                                    </td>
+                                    <td th:text="${temp_leli.atSideB.length > 0 ? 'Kitti-Bodhichu' : 'Its OK Alla'}"
+                                        th:class="${temp_leli.atSideB.length > 0 ? 'status-received' : 'status-missing'}">
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/leaves/updateForm(leaveId=${temp_leli.id})}" class="action-link">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(leavesList)}">
+                                    <td colspan="7"
+                                        style="text-align: center; padding: 2rem; color: var(--text-secondary);">No
+                                        records for this month.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
-
-
-    <!--    Shammy appears -->
+    <!-- Shammy appears -->
     <div id="dialogueBox" class="dialogue-container">
         <div class="dialogue-bubble">
-            Paranjille mone, comma separated dd mathram mathyenn..ehh..idi veno
+            Paranjille mone, comma separated dd mathram mathyenn..ehh..idi veno?
         </div>
         <img th:src="@{/img/shammy1.png}" alt="character" class="dialogue-character">
     </div>
 
-
-
-<script th:src="@{/js/leaves.js}"></script>
-
+    <script th:src="@{/js/leaves.js}"></script>
 </div>
+
 </html>
