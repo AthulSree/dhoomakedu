@@ -76,7 +76,7 @@ public class MessageController {
         }
 
         // Append sender name to message
-        String fullMessage = message + "\n\nRegards,\n" + senderName;
+        String fullMessage = message + "\n\n\n\n\n\n\n\n\n\nRegards,\n" + senderName + "\n[Nēnu nīke Dūtanu]";
 
         for (Integer hostId1 : hostId) {
             groupHost groupHost = groupHostService.findById(hostId1);
@@ -86,7 +86,7 @@ public class MessageController {
             String hostPassword = groupHost.getPassword();
 
             String command = "export DISPLAY=:0; " +
-                    "nohup zenity --info " +
+                    "nohup zenity --notification " +
                     "--title='\uD83D\uDD4A\uFE0F Doothan Incoming...' " +
                     "--text=\"" + fullMessage + "\" " + // wrap message in quotes
                     " > /dev/null 2>&1 &";
