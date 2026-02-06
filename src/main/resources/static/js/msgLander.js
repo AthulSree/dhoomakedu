@@ -4,12 +4,12 @@ $(function () {
 
     //MPR grp selection
     $(document).on("click", "#grp_dd_mpr", function () {
-        $('#hostdd').val(['1', '3', '4', '5', '6']).trigger('change');
+        $('#hostdd').val(['1', '2', '3', '5', '6', '7', '8', '9', '10', '12']).trigger('change');
     })
 
     //Tea grp selection
     $(document).on("click", "#grp_dd_tea", function () {
-        $('#hostdd').val(['1', '3', '5', '6']).trigger('change');
+        $('#hostdd').val(['1', '2', '3', '4', '9']).trigger('change');
     })
 
     //Crex grp selection
