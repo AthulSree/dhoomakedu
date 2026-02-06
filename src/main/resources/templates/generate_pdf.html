@@ -151,11 +151,18 @@
             border-radius: 50%;
             font-size: 1rem;
             border: 1px solid rgba(251, 191, 36, 0.2);
-            animation: pulse 2s infinite;
+            animation: pulse-amber 2s infinite;
             cursor: help;
         }
 
-        @keyframes pulse {
+        .wo-warning.critical {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-amber {
             0% {
                 box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
             }
@@ -166,6 +173,20 @@
 
             100% {
                 box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+            }
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
             }
         }
 
@@ -283,9 +304,10 @@
 
                 <div class="leave-status"></div>
 
-                <!-- Next Month Expiry Indicator -->
+                <!-- WO Expiry Warning (within 2 months) -->
                 <div class="wo-warning"
-                    th:if="${emp.woToDate != null && #dates.year(emp.woToDate) == T(java.time.LocalDate).now().plusMonths(1).year && #dates.month(emp.woToDate) == T(java.time.LocalDate).now().plusMonths(1).monthValue}"
+                    th:if="${emp.woToDate != null and emp.woToDate ge #dates.createToday() and emp.woToDate le T(java.sql.Date).valueOf(T(java.time.LocalDate).now().plusMonths(2))}"
+                    th:classappend="${#dates.format(emp.woToDate, 'yyyy-MM') == #dates.format(#dates.createToday(), 'yyyy-MM')} ? 'critical' : ''"
                     th:title="'Work Order expiring on ' + ${#dates.format(emp.woToDate, 'dd MMM yyyy')}">
                     <i class="fas fa-history"></i>
                 </div>
