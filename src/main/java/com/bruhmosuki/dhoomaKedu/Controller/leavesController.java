@@ -190,10 +190,10 @@ public class leavesController {
         float comboRemaining = wo.getComboLeaves();
 
         DecimalFormat df = new DecimalFormat("0.#");
-        String footerText = "Available Leaves : " + df.format(regularAvailable) + "\n" +
-                "Leaves taken : " + df.format(regularTaken) + "\n" +
-                "Pending Leaves :" + df.format(regularPending);
-
+        // String footerText = "Available Leaves : " + df.format(regularAvailable) + "\n" +
+        //         "Leaves taken : " + df.format(regularTaken) + "\n" +
+        //         "Pending Leaves :" + df.format(regularPending);
+        String footerText = "";
         if (comboAvailable > 0 || totalLeavesActual > 1) {
             footerText += "\n\nCombo Leaves available : " + df.format(comboAvailable) + "\n" +
                     "Combo Leaves Taken : " + df.format(comboUsed) + "\n" +
