@@ -11,45 +11,49 @@ import java.util.Optional;
 @Service
 public class employeeService {
 
-    //    create repository obj
+    // create repository obj
     private final employeeRepository employeeRepository;
 
-    //    create constructor for initialising repository obj
+    // create constructor for initialising repository obj
     public employeeService(employeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
     }
 
-    //    findall fn
-    public List<employee> findAll(){
+    // findall fn
+    public List<employee> findAll() {
         return employeeRepository.findAll();
     }
 
-    //    findbyid fn
-    public employee findById(int theId){
+    // findbyid fn
+    public employee findById(int theId) {
         Optional<employee> result = employeeRepository.findById(theId);
 
         employee the_employee = null;
 
-        if(result.isPresent()){
+        if (result.isPresent()) {
             the_employee = result.get();
-        }else{
-            throw new RuntimeException("No Employee Found for -"+theId);
+        } else {
+            throw new RuntimeException("No Employee Found for -" + theId);
         }
         return the_employee;
     }
 
-    //    save fn
-    public void save(employee the_employee){
+    // save fn
+    public void save(employee the_employee) {
         employeeRepository.save(the_employee);
     }
 
-    //    delete fn
-    public void deleteById(int theId){
+    // delete fn
+    public void deleteById(int theId) {
         employeeRepository.deleteById(theId);
     }
 
-    public List<employeeLeaveDto> getAllEmployeesLeaveDetails(){
+    public List<employeeLeaveDto> getAllEmployeesLeaveDetails() {
         return employeeRepository.findEmployeeLeaveDetails();
+    }
+
+    public employee findBySysIp(String sysIp) {
+        return employeeRepository.findBySys_ip(sysIp);
     }
 
 }

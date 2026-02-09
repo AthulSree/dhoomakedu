@@ -5,6 +5,8 @@ import com.bruhmosuki.dhoomaKedu.entity.employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import org.springframework.data.repository.query.Param;
+
 import java.util.List;
 
 public interface employeeRepository extends JpaRepository<employee, Integer> {
@@ -27,5 +29,8 @@ public interface employeeRepository extends JpaRepository<employee, Integer> {
                         +
                         "LEFT JOIN work_order W ON W.EMP_ID = E.ID", nativeQuery = true)
         List<employeeLeaveDto> findEmployeeLeaveDetails();
+
+        @Query("SELECT e FROM employee e WHERE e.sys_ip = :sysIp")
+        employee findBySys_ip(@Param("sysIp") String sysIp);
 
 }
