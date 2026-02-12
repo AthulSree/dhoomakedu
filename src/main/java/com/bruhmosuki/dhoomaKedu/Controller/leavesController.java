@@ -179,9 +179,9 @@ public class leavesController {
         totalLeavesActual += theLeave.getHalfDayLeaveCnt() * 0.5f;
 
         // Regular Leaves calculation (1st leave is regular)
-        float regularAvailable = 3.0f;
-        float regularTaken = Math.min(1.0f, totalLeavesActual);
-        float regularPending = regularAvailable - regularTaken;
+        // float regularAvailable = 3.0f;
+        // float regularTaken = Math.min(1.0f, totalLeavesActual);
+        // float regularPending = regularAvailable - regularTaken;
 
         // Combo Leaves Logic for PDF
         workorder wo = theWorkorderService.findByEmpId(theEmployeeData);

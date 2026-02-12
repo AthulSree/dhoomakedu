@@ -245,13 +245,25 @@
 
         /* Status Colors */
         .status-received {
+            background: rgba(52, 211, 153, 0.1);
             color: var(--accent-green);
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
             font-weight: 600;
+            font-size: 0.75rem;
+            display: inline-block;
+            border: 1px solid rgba(52, 211, 153, 0.2);
         }
 
         .status-missing {
+            background: rgba(239, 68, 68, 0.1);
             color: var(--accent-red);
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
             font-weight: 600;
+            font-size: 0.75rem;
+            display: inline-block;
+            border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
         /* Dialogue Box */
@@ -409,11 +421,15 @@
                                     <td th:text="${temp_leli.empId.first_name}" style="font-weight: 600;"></td>
                                     <td th:text="${temp_leli.leaveStr}"></td>
                                     <td th:text="${temp_leli.halfDayLeaveCnt ?: '0'}"></td>
-                                    <td th:text="${temp_leli.atSideA.length > 0 ? 'Kitti-Bodhichu' : 'Its OK Alla'}"
-                                        th:class="${temp_leli.atSideA.length > 0 ? 'status-received' : 'status-missing'}">
+                                    <td>
+                                        <span th:text="${temp_leli.atSideA.length > 0 ? 'Kitti-Bodhichu' : 'Its OK Alla'}"
+                                              th:class="${temp_leli.atSideA.length > 0 ? 'status-received' : 'status-missing'}">
+                                        </span>
                                     </td>
-                                    <td th:text="${temp_leli.atSideB.length > 0 ? 'Kitti-Bodhichu' : 'Its OK Alla'}"
-                                        th:class="${temp_leli.atSideB.length > 0 ? 'status-received' : 'status-missing'}">
+                                    <td>
+                                        <span th:text="${temp_leli.atSideB.length > 0 ? 'Kitti-Bodhichu' : 'Its OK Alla'}"
+                                              th:class="${temp_leli.atSideB.length > 0 ? 'status-received' : 'status-missing'}">
+                                        </span>
                                     </td>
                                     <td>
                                         <a th:href="@{/leaves/updateForm(leaveId=${temp_leli.id})}" class="action-link">
