@@ -153,7 +153,7 @@ public class leavesController {
         monthPeriod theMonthPeriod = theMonthPeriodService.findAll().get(0);
         leaves theLeave = theLeaveService.findByEmpIdAndLeaveMpMonthAndLeaveMpYear(
                 theEmployeeData, theMonthPeriod.getMonth(), theMonthPeriod.getYear());
-        float totalLeavesTaken = theLeaveService.findTotalComboLeavesTakenThisYear(theEmployeeData);
+        float totalComboLeavesTaken = theLeaveService.findTotalComboLeavesTakenThisYear(theEmployeeData);
         
 
         byte[] atFile = null;
@@ -184,15 +184,15 @@ public class leavesController {
 
         // Combo Leaves Logic for PDF
         workorder wo = theWorkorderService.findByEmpId(theEmployeeData);
-        float comboUsed = theLeave.getUsedComboLeaves();
-        float comboAvailable = wo.getComboLeaves();
-        float comboRemaining = wo.getComboLeaves() - totalLeavesTaken;
+        float comboUsedThisMonth = theLeave.getUsedComboLeaves(); // 1
+        float comboRemaining = wo.getComboLeaves() - totalComboLeavesTaken; // 11
+        float comboAvailable = wo.getComboLeaves() - (totalComboLeavesTaken - comboUsedThisMonth); // 12
 
         DecimalFormat df = new DecimalFormat("0.#");
         String footerText = "";
         if (comboAvailable > 0 || totalLeavesActual > 1) {
             footerText += "\n\nCombo Leaves available : " + df.format(comboAvailable) + "\n" +
-                    "Combo Leaves Taken : " + df.format(comboUsed) + "\n" +
+                    "Combo Leaves Taken : " + df.format(comboUsedThisMonth) + "\n" +
                     "Combo leaves remaining : " + df.format(comboRemaining);
         }
 
