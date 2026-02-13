@@ -57,6 +57,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -65,26 +66,27 @@
 
         .header-section {
             text-align: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             flex-shrink: 0;
         }
 
         .header-title {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
             background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 0.2rem;
+            margin-bottom: 0.1rem;
         }
 
         .content-layout {
             display: flex;
-            gap: 1.5rem;
-            align-items: flex-start;
+            gap: 1.25rem;
+            align-items: stretch;
             flex: 1;
             min-height: 0;
+            overflow: hidden;
         }
 
         .form-side {
@@ -99,6 +101,7 @@
         .form-side::-webkit-scrollbar {
             width: 4px;
         }
+
         .form-side::-webkit-scrollbar-thumb {
             background: var(--glass-border);
             border-radius: 10px;
@@ -106,10 +109,30 @@
 
         .table-side {
             flex: 1;
-            min-width: 0; /* Allow shrinking */
+            min-width: 0;
             display: flex;
             flex-direction: column;
             min-height: 0;
+        }
+
+        /* Custom scrollbar for table container */
+        .table-container::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 10px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         @media (max-width: 1200px) {
@@ -117,17 +140,22 @@
                 flex-direction: column;
                 overflow-y: auto;
             }
-            .form-side, .table-side {
+
+            .form-side,
+            .table-side {
                 flex: none;
                 width: 100%;
                 min-width: 100%;
             }
+
             body {
                 overflow: auto !important;
                 height: auto !important;
             }
+
             .page-wrapper {
                 height: auto;
+                min-height: 100vh;
             }
         }
 
@@ -239,9 +267,12 @@
         }
 
         .table-container {
-            overflow: auto;
+            overflow-y: auto;
+            overflow-x: auto;
             flex: 1;
+            min-height: 0;
             border-radius: 1rem;
+            padding-bottom: 80px;
         }
 
         .modern-table {
@@ -267,7 +298,7 @@
         }
 
         .modern-table td {
-            padding: 0.75rem 1rem;
+            padding: 0.6rem 1rem;
             color: var(--text-primary);
             border-bottom: 1px solid var(--glass-border);
         }
@@ -300,9 +331,15 @@
             font-weight: 600;
         }
 
-        .agency-aeo { background: rgba(52, 211, 153, 0.1); color: var(--accent-green); }
-        .agency-akl { background: rgba(96, 165, 250, 0.1); color: var(--accent-blue); }
+        .agency-aeo {
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--accent-green);
+        }
 
+        .agency-akl {
+            background: rgba(96, 165, 250, 0.1);
+            color: var(--accent-blue);
+        }
     </style>
 
     <div class="page-wrapper">
@@ -323,7 +360,8 @@
                             <div class="form-group">
                                 <label class="form-label" for="name">Employee</label>
                                 <select class="glass-input" id="name" th:field="*{empId}" required>
-                                    <option th:each="emp : ${emp_list}" th:value="${emp.id}" th:text="${emp.first_name}"></option>
+                                    <option th:each="emp : ${emp_list}" th:value="${emp.id}"
+                                        th:text="${emp.first_name}"></option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -343,23 +381,27 @@
                         <div class="form-row-dual">
                             <div class="form-group">
                                 <label class="form-label" for="woNumber">WorkOrder No</label>
-                                <input class="glass-input" type="text" id="woNumber" th:field="*{woNumber}" required placeholder="WO-XXXX">
+                                <input class="glass-input" type="text" id="woNumber" th:field="*{woNumber}" required
+                                    placeholder="WO-XXXX">
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="projectNo">Project No</label>
-                                <input class="glass-input" type="text" id="projectNo" th:field="*{projectNo}" required placeholder="PRJ-XXXX">
+                                <input class="glass-input" type="text" id="projectNo" th:field="*{projectNo}" required
+                                    placeholder="PRJ-XXXX">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="designation">Designation</label>
-                            <input class="glass-input" type="text" id="designation" th:field="*{designation}" required placeholder="System Architect">
+                            <input class="glass-input" type="text" id="designation" th:field="*{designation}" required
+                                placeholder="System Architect">
                         </div>
 
                         <div class="form-row-dual">
                             <div class="form-group">
                                 <label class="form-label" for="woFromDate">From Date</label>
-                                <input class="glass-input" type="date" id="woFromDate" th:field="*{woFromDate}" required>
+                                <input class="glass-input" type="date" id="woFromDate" th:field="*{woFromDate}"
+                                    required>
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="woToDate">To Date</label>
@@ -369,11 +411,13 @@
 
                         <div class="form-group">
                             <label class="form-label" for="comboLeaves">Total Combo Leaves</label>
-                            <input class="glass-input" type="number" id="comboLeaves" th:field="*{comboLeaves}" step="0.5" required>
+                            <input class="glass-input" type="number" id="comboLeaves" th:field="*{comboLeaves}"
+                                step="0.5" required>
                         </div>
 
                         <div class="btn-row">
-                            <button type="submit" class="modern-btn btn-save"><i class="fas fa-save"></i> Save WO</button>
+                            <button type="submit" class="modern-btn btn-save"><i class="fas fa-save"></i> Save
+                                WO</button>
                             <button type="reset" class="modern-btn btn-reset"><i class="fas fa-undo"></i> Reset</button>
                         </div>
                     </form>
@@ -384,10 +428,12 @@
             <main class="table-side">
                 <div class="table-header-row">
                     <h2 class="card-title" style="margin:0;"><i class="fas fa-list"></i> Active Work Orders</h2>
-                    <span style="color: var(--text-secondary); font-size: 0.8rem;" th:text="${#lists.size(wo_list)} + ' Records Found'"></span>
+                    <span style="color: var(--text-secondary); font-size: 0.8rem;"
+                        th:text="${#lists.size(wo_list)} + ' Records Found'"></span>
                 </div>
 
-                <div class="glass-card" style="padding: 0.5rem; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                <div class="glass-card"
+                    style="padding: 0.5rem; flex: 1; display: flex; flex-direction: column; min-height: 0;">
                     <div class="table-container">
                         <table class="modern-table">
                             <thead>
@@ -406,34 +452,41 @@
                             </thead>
                             <tbody>
                                 <tr th:each="temp_wo, iterstat : ${wo_list}">
-                                    <td th:text="${iterstat.count}" style="color: var(--text-secondary); font-weight: 600;"></td>
+                                    <td th:text="${iterstat.count}"
+                                        style="color: var(--text-secondary); font-weight: 600;"></td>
                                     <td th:text="${temp_wo.empId.first_name}" style="font-weight: 600;"></td>
                                     <td>
-                                        <span th:text="${temp_wo.agency == 'AEOLOGIC' ? 'AEO' : (temp_wo.agency == 'AKAL' ? 'AKL' : temp_wo.agency)}"
-                                              th:class="${temp_wo.agency == 'AEOLOGIC' ? 'badge-agency agency-aeo' : (temp_wo.agency == 'AKAL' ? 'badge-agency agency-akl' : '')}">
+                                        <span
+                                            th:text="${temp_wo.agency == 'AEOLOGIC' ? 'AEO' : (temp_wo.agency == 'AKAL' ? 'AKL' : temp_wo.agency)}"
+                                            th:class="${temp_wo.agency == 'AEOLOGIC' ? 'badge-agency agency-aeo' : (temp_wo.agency == 'AKAL' ? 'badge-agency agency-akl' : '')}">
                                         </span>
                                     </td>
                                     <td th:text="${temp_wo.projectNo}"></td>
                                     <td th:text="${temp_wo.woNumber}"></td>
                                     <td th:text="${temp_wo.designation}" style="font-size: 0.8rem;"></td>
-                                    <td th:text="${#temporals.format(temp_wo.joinDate, 'dd-MM-yyyy')}" style="white-space: nowrap;"></td>
+                                    <td th:text="${#temporals.format(temp_wo.joinDate, 'dd-MM-yyyy')}"
+                                        style="white-space: nowrap;"></td>
                                     <td>
                                         <div style="font-size: 0.8rem;">
-                                            <span th:text="${#temporals.format(temp_wo.woFromDate, 'dd-MM-yyyy')}"></span>
+                                            <span
+                                                th:text="${#temporals.format(temp_wo.woFromDate, 'dd-MM-yyyy')}"></span>
                                             <br><span style="color: var(--text-secondary);">to</span><br>
                                             <span th:text="${#temporals.format(temp_wo.woToDate, 'dd-MM-yyyy')}"></span>
                                         </div>
                                     </td>
                                     <td th:text="${temp_wo.comboLeaves}" style="text-align: center;"></td>
                                     <td>
-                                        <a th:href="@{/workorder/updateFormWorkorder(woId=${temp_wo.id})}" class="action-link">
+                                        <a th:href="@{/workorder/updateFormWorkorder(woId=${temp_wo.id})}"
+                                            class="action-link">
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
                                     </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(wo_list)}">
-                                    <td colspan="10" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
-                                        <i class="fas fa-folder-open" style="font-size: 2rem; display: block; margin-bottom: 1rem; opacity: 0.5;"></i>
+                                    <td colspan="10"
+                                        style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                                        <i class="fas fa-folder-open"
+                                            style="font-size: 2rem; display: block; margin-bottom: 1rem; opacity: 0.5;"></i>
                                         No work orders found.
                                     </td>
                                 </tr>
@@ -446,4 +499,5 @@
     </div>
 
 </div>
+
 </html>
