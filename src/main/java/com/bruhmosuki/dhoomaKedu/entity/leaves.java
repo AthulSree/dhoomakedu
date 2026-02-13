@@ -24,6 +24,9 @@ public class leaves {
     @Column(name = "half_day_leave_count", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int halfDayLeaveCnt;
 
+    @Column(name = "used_combo_leaves", nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int usedComboLeaves;
+
     @Column(name = "leave_month", nullable = false)
     private int leaveMpMonth;
 
@@ -37,9 +40,6 @@ public class leaves {
     @Lob
     @Column(name = "at_side_b", columnDefinition = "LONGBLOB", nullable = true)
     private byte[] atSideB;
-
-    @Column(name = "combo_leaves_used", nullable = false, columnDefinition = "FLOAT DEFAULT 0")
-    private float comboLeavesUsed;
 
     @UpdateTimestamp
     private LocalDateTime updatedTime;
@@ -79,6 +79,14 @@ public class leaves {
         this.halfDayLeaveCnt = halfDayLeaveCnt;
     }
 
+    public int getUsedComboLeaves() {
+        return usedComboLeaves;
+    }
+
+    public void setUsedComboLeaves(int usedComboLeaves) {
+        this.usedComboLeaves = usedComboLeaves;
+    }
+
     public int getLeaveMpMonth() {
         return leaveMpMonth;
     }
@@ -111,14 +119,6 @@ public class leaves {
         this.atSideB = atSideB;
     }
 
-    public float getComboLeavesUsed() {
-        return comboLeavesUsed;
-    }
-
-    public void setComboLeavesUsed(float comboLeavesUsed) {
-        this.comboLeavesUsed = comboLeavesUsed;
-    }
-
     public LocalDateTime getUpdatedTime() {
         return updatedTime;
     }
@@ -134,11 +134,11 @@ public class leaves {
                 ", empId=" + empId +
                 ", leaveStr='" + leaveStr + '\'' +
                 ", halfDayLeaveCnt=" + halfDayLeaveCnt +
+                ", usedComboLeaves=" + usedComboLeaves +
                 ", leaveMpMonth=" + leaveMpMonth +
                 ", leaveMpYear=" + leaveMpYear +
                 ", atSideA=" + Arrays.toString(atSideA) +
                 ", atSideB=" + Arrays.toString(atSideB) +
-                ", comboLeavesUsed=" + comboLeavesUsed +
                 ", updatedTime=" + updatedTime +
                 '}';
     }

@@ -16,7 +16,6 @@ body {
   align-items: center;
 }
 
-/* Container for stars, dust, comets, meteors, UFOs, satellite, moon, nebulae, and rocket */
 .background-container {
   position: fixed;
   top: 0;
@@ -24,6 +23,8 @@ body {
   width: 100%;
   height: 100%;
   z-index: 0;
+  pointer-events: none;
+  /* Ensure it doesn't interfere with clicks */
 }
 
 /* Nebula effect */
@@ -83,6 +84,9 @@ body {
   height: 100%;
   background: transparent;
   z-index: 2;
+  will-change: transform;
+  transform: translateZ(0);
+  /* Force GPU layer */
 }
 
 .stars {
@@ -193,6 +197,7 @@ body {
   height: 100%;
   background: transparent;
   z-index: 3;
+  will-change: transform;
 }
 
 .dust {

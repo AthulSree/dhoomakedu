@@ -79,7 +79,7 @@ public class leavesController {
 
     @PostMapping("/saveLeave")
     public String saveLeave(@ModelAttribute("leaveObj") leaveDto theLeaveDto) throws IOException {
-        System.out.println(">>>>>>>>>>" + theLeaveDto.getId() + "<<<<<<<<<<<<<<<<");
+        System.out.println(">>>>>>>>>>" + theLeaveDto.getUsedComboLeaves() + "<<<<<<<<<<<<<<<<");
 
         leaves chkAvail = theLeaveService.findByEmpIdAndLeaveMpMonthAndLeaveMpYear(theLeaveDto.getEmpId(),
                 theLeaveDto.getLeaveMpMonth(), theLeaveDto.getLeaveMpYear());
@@ -100,6 +100,7 @@ public class leavesController {
         theSavedLeave.setEmpId(theLeaveDto.getEmpId());
         theSavedLeave.setLeaveStr(theLeaveDto.getLeaveStr());
         theSavedLeave.setHalfDayLeaveCnt(theLeaveDto.getHalfDayLeaveCnt());
+        theSavedLeave.setUsedComboLeaves(theLeaveDto.getUsedComboLeaves());
         theSavedLeave.setLeaveMpMonth(theLeaveDto.getLeaveMpMonth());
         theSavedLeave.setLeaveMpYear(theLeaveDto.getLeaveMpYear());
         theSavedLeave.setAtSideA(theLeaveDto.getAtSideA().getBytes());
@@ -118,11 +119,11 @@ public class leavesController {
         employee emp = theEmployeeService.findById(theLeaveDto.getEmpId().getId().intValue());
         workorder wo = theWorkorderService.findByEmpId(emp);
 
-        float delta = newComboUsed - theSavedLeave.getComboLeavesUsed();
+        float delta = newComboUsed - theSavedLeave.getUsedComboLeaves();
         wo.setComboLeaves(wo.getComboLeaves() - delta);
         theWorkorderService.save(wo);
 
-        theSavedLeave.setComboLeavesUsed(newComboUsed);
+        // theSavedLeave.setUsedComboLeaves(newComboUsed);
 
         theLeaveService.save(theSavedLeave);
         return "redirect:/leaves/manage";
@@ -152,6 +153,8 @@ public class leavesController {
         monthPeriod theMonthPeriod = theMonthPeriodService.findAll().get(0);
         leaves theLeave = theLeaveService.findByEmpIdAndLeaveMpMonthAndLeaveMpYear(
                 theEmployeeData, theMonthPeriod.getMonth(), theMonthPeriod.getYear());
+        float totalLeavesTaken = theLeaveService.findTotalComboLeavesTakenThisYear(theEmployeeData);
+        
 
         byte[] atFile = null;
         String sideLabel = "";
@@ -178,21 +181,14 @@ public class leavesController {
         }
         totalLeavesActual += theLeave.getHalfDayLeaveCnt() * 0.5f;
 
-        // Regular Leaves calculation (1st leave is regular)
-        // float regularAvailable = 3.0f;
-        // float regularTaken = Math.min(1.0f, totalLeavesActual);
-        // float regularPending = regularAvailable - regularTaken;
 
         // Combo Leaves Logic for PDF
         workorder wo = theWorkorderService.findByEmpId(theEmployeeData);
-        float comboUsed = theLeave.getComboLeavesUsed();
-        float comboAvailable = wo.getComboLeaves() + comboUsed;
-        float comboRemaining = wo.getComboLeaves();
+        float comboUsed = theLeave.getUsedComboLeaves();
+        float comboAvailable = wo.getComboLeaves();
+        float comboRemaining = wo.getComboLeaves() - totalLeavesTaken;
 
         DecimalFormat df = new DecimalFormat("0.#");
-        // String footerText = "Available Leaves : " + df.format(regularAvailable) + "\n" +
-        //         "Leaves taken : " + df.format(regularTaken) + "\n" +
-        //         "Pending Leaves :" + df.format(regularPending);
         String footerText = "";
         if (comboAvailable > 0 || totalLeavesActual > 1) {
             footerText += "\n\nCombo Leaves available : " + df.format(comboAvailable) + "\n" +

@@ -6,11 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface leavesRepository extends JpaRepository<leaves,Integer> {
+public interface leavesRepository extends JpaRepository<leaves, Integer> {
 
     List<leaves> findByLeaveMpMonthAndLeaveMpYear(int month, int year);
 
     leaves findByEmpIdAndLeaveMpMonthAndLeaveMpYear(employee emp, int month, int year);
+
+    List<leaves> findByEmpIdAndLeaveMpYear(employee emp, int year);
 
     leaves findByEmpId(employee emp);
 }

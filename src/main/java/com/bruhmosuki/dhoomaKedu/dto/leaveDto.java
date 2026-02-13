@@ -10,6 +10,7 @@ public class leaveDto {
     private employee empId;
     private String leaveStr;
     private int halfDayLeaveCnt;
+    private int usedComboLeaves;
     private int leaveMpMonth;
     private int leaveMpYear;
     private MultipartFile atSideA;
@@ -46,6 +47,14 @@ public class leaveDto {
 
     public void setHalfDayLeaveCnt(int halfDayLeaveCnt) {
         this.halfDayLeaveCnt = halfDayLeaveCnt;
+    }
+
+    public int getUsedComboLeaves() {
+        return usedComboLeaves;
+    }
+
+    public void setUsedComboLeaves(int usedComboLeaves) {
+        this.usedComboLeaves = usedComboLeaves;
     }
 
     public int getLeaveMpMonth() {

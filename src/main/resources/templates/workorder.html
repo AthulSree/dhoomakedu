@@ -160,9 +160,11 @@
         }
 
         .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.08);
+            /* Slightly more opaque */
+            backdrop-filter: blur(12px);
+            /* Reduced from 20px */
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
             border-radius: 1.5rem;
             padding: 1.5rem;
