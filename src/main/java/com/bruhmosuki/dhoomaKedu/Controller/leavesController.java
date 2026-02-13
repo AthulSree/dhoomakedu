@@ -179,9 +179,9 @@ public class leavesController {
         totalLeavesActual += theLeave.getHalfDayLeaveCnt() * 0.5f;
 
         // Regular Leaves calculation (1st leave is regular)
-        float regularAvailable = 3.0f;
-        float regularTaken = Math.min(1.0f, totalLeavesActual);
-        float regularPending = regularAvailable - regularTaken;
+        // float regularAvailable = 3.0f;
+        // float regularTaken = Math.min(1.0f, totalLeavesActual);
+        // float regularPending = regularAvailable - regularTaken;
 
         // Combo Leaves Logic for PDF
         workorder wo = theWorkorderService.findByEmpId(theEmployeeData);
@@ -190,10 +190,10 @@ public class leavesController {
         float comboRemaining = wo.getComboLeaves();
 
         DecimalFormat df = new DecimalFormat("0.#");
-        String footerText = "Available Leaves : " + df.format(regularAvailable) + "\n" +
-                "Leaves taken : " + df.format(regularTaken) + "\n" +
-                "Pending Leaves :" + df.format(regularPending);
-
+        // String footerText = "Available Leaves : " + df.format(regularAvailable) + "\n" +
+        //         "Leaves taken : " + df.format(regularTaken) + "\n" +
+        //         "Pending Leaves :" + df.format(regularPending);
+        String footerText = "";
         if (comboAvailable > 0 || totalLeavesActual > 1) {
             footerText += "\n\nCombo Leaves available : " + df.format(comboAvailable) + "\n" +
                     "Combo Leaves Taken : " + df.format(comboUsed) + "\n" +
