@@ -3,99 +3,488 @@
 <html layout:decorate="~{base}">
 
 <div layout:fragment="content">
-
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-    .astro-error-card {
-    background: #0d1b2a;
-    color: #e0e6ed;
-    border: 2px solid #ff4d4d;
-    border-radius: 12px;
-    width: 1000px;
-    padding: 16px;
-    box-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
-    font-family: 'Orbitron', sans-serif; /* optional sci-fi font */
-  }
+    :root {
+      --hologram-cyan: #00f7ff;
+      --hologram-red: #ff2d55;
+      --hologram-blue: #0066ff;
+      --glow: rgba(0, 247, 255, 0.4);
+    }
 
-  .error-header {
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid #ff4d4d;
-    padding-bottom: 8px;
-    margin-bottom: 12px;
-  }
+    .main-content {
+      max-width: 100% !important;
+      perspective: 1500px;
+      overflow: visible;
+    }
 
-  .error-icon {
-    font-size: 24px;
-    margin-right: 8px;
-  }
+    .hologram-staging {
+      position: relative;
+      width: 100%;
+      height: 85vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform-style: preserve-3d;
+      animation: ambientFloat 8s ease-in-out infinite;
+    }
 
-  .error-title {
-    font-size: 18px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: #ff4d4d;
-  }
+    @keyframes ambientFloat {
+      0%, 100% { transform: translateY(0) rotateX(2deg); }
+      50% { transform: translateY(-20px) rotateX(-2deg); }
+    }
 
-  .error-body p {
-    margin: 6px 0;
-    font-size: 14px;
-    line-height: 1.4;
-  }
+    /* The 'Projector' Base */
+    .hologram-base {
+      position: absolute;
+      bottom: 10%;
+      width: 400px;
+      height: 40px;
+      background: linear-gradient(to top, #1a1a1a, #333);
+      border-radius: 50% / 20%;
+      box-shadow: 
+        0 0 50px var(--hologram-blue),
+        inset 0 0 20px rgba(0,0,0,0.8);
+      filter: blur(2px);
+    }
 
-  .error-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 12px;
-  }
+    .projection-beam {
+      position: absolute;
+      bottom: 15%;
+      width: 300px;
+      height: 500px;
+      background: conic-gradient(from 180deg at 50% 100%, transparent 160deg, rgba(0, 247, 255, 0.05) 180deg, transparent 200deg);
+      filter: blur(10px);
+      pointer-events: none;
+    }
 
-  .retry-btn, .abort-btn {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-  }
+    /* Fragmented Panels */
+    .holo-panel {
+      position: absolute;
+      background: rgba(0, 247, 255, 0.03);
+      border: 1px solid rgba(0, 247, 255, 0.2);
+      backdrop-filter: blur(8px);
+      padding: 20px;
+      color: var(--hologram-cyan);
+      font-family: 'Share Tech Mono', monospace;
+      box-shadow: 0 0 20px rgba(0, 247, 255, 0.1);
+      transition: 0.3s cubic-bezier(0.2, 0, 0, 1);
+    }
 
-  .retry-btn {
-    background: #1a3d5d;
-    color: #e0e6ed;
-  }
+    .holo-panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0, 247, 255, 0.05) 2px);
+      pointer-events: none;
+    }
 
-  .retry-btn:hover {
-    background: #28597a;
-  }
+    /* Specific Panels at different 3D depths */
+    .panel-main {
+      width: 550px;
+      transform: translateZ(50px);
+      border-left: 4px solid var(--hologram-red);
+      z-index: 10;
+    }
 
-  .abort-btn {
-    background: #ff4d4d;
-    color: white;
-  }
+    .panel-side {
+      width: 380px;
+      transform: translateX(500px) rotateY(-30deg) translateZ(0);
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
 
-  .abort-btn:hover {
-    background: #e60000;
-  }
+    .panel-left {
+      width: 300px;
+      height: 400px;
+      transform: translateX(-500px) rotateY(30deg) translateZ(0);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 4px double rgba(0, 247, 255, 0.3);
+      padding: 0;
+    }
 
+    .space-window {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .portal-stars {
+      position: absolute;
+      width: 200%; height: 200%;
+      background: radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+                  radial-gradient(1px 1px at 40px 70px, #fff, transparent),
+                  radial-gradient(1px 1px at 70px 10px, #fff, transparent),
+                  radial-gradient(1px 1px at 150px 150px, #fff, transparent);
+      background-size: 200px 200px;
+      animation: drift 60s linear infinite;
+    }
+
+    .planet-view {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      background: radial-gradient(circle at 30% 30%, #00f7ff 0%, #0066ff 40%, #001a33 100%);
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: inset -20px -20px 60px #000, 
+                  0 0 50px rgba(0, 102, 255, 0.4);
+      overflow: hidden;
+    }
+
+    .planet-texture {
+      position: absolute;
+      width: 200%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.05) 10px,
+        transparent 20px
+      );
+      animation: swirl 10s linear infinite;
+      opacity: 0.3;
+      transform: rotate(-25deg);
+    }
+
+    @keyframes swirl {
+      from { left: -100%; }
+      to { left: 0; }
+    }
+
+    .planet-rings {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 220px;
+      height: 40px;
+      border: 8px solid rgba(0, 247, 255, 0.15);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) rotateX(75deg) rotateY(-15deg);
+      box-shadow: 0 0 15px rgba(0, 247, 255, 0.1);
+      z-index: 1;
+    }
+
+    .planet-atmosphere {
+      position: absolute;
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      box-shadow: inset 15px 15px 40px rgba(255, 255, 255, 0.2);
+    }
+
+    .nebula-cloud {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(0, 102, 255, 0.15) 0%, transparent 70%);
+      filter: blur(30px);
+      top: -50px; left: -50px;
+      animation: driftNebula 30s ease-in-out infinite alternate;
+    }
+
+    @keyframes driftNebula {
+      from { transform: translate(0, 0); }
+      to { transform: translate(50px, 30px); }
+    }
+
+    @keyframes drift {
+      from { transform: translate(0,0); }
+      to { transform: translate(-50px, -50px); }
+    }
+
+    .meteor-approaching {
+      position: absolute;
+      top: 10%;
+      left: 10%;
+      width: 6px;
+      height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 15px #fff, 0 0 30px var(--hologram-cyan);
+      animation: meteorTravel 7s cubic-bezier(0.4, 0, 1, 1) infinite;
+      z-index: 2;
+    }
+
+    .meteor-approaching::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 150px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--hologram-cyan), transparent);
+      transform: translateY(-50%) rotate(-135deg);
+      transform-origin: left;
+      filter: blur(1px);
+    }
+
+    @keyframes meteorTravel {
+      0% {
+        transform: translate(-150px, -150px) scale(0);
+        opacity: 0;
+      }
+      30% {
+        opacity: 1;
+      }
+      100% {
+        transform: translate(400px, 400px) scale(8);
+        opacity: 0;
+      }
+    }
+
+    .panel-top {
+      width: 300px;
+      transform: translateY(-280px) translateZ(20px) rotateX(10deg);
+      text-align: center;
+      border-bottom: 2px solid var(--hologram-cyan);
+    }
+
+    /* Glitch Typography */
+    .glitch-text {
+      font-size: 3rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      position: relative;
+      color: var(--hologram-cyan);
+      letter-spacing: 5px;
+      margin: 0;
+    }
+
+    .glitch-text::before, .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0.8;
+    }
+
+    .glitch-text::before {
+      color: var(--hologram-red);
+      z-index: -1;
+      animation: glitchAnim 3s infinite linear alternate-reverse;
+    }
+
+    .glitch-text::after {
+      color: var(--hologram-blue);
+      z-index: -2;
+      animation: glitchAnim 2s infinite linear alternate;
+    }
+
+    @keyframes glitchAnim {
+      0% { transform: translate(0); }
+      20% { transform: translate(-3px, 3px); }
+      40% { transform: translate(-3px, -3px); }
+      60% { transform: translate(3px, 3px); }
+      80% { transform: translate(3px, -3px); }
+      100% { transform: translate(0); }
+    }
+
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+      padding: 10px 0;
+      margin-bottom: 5px;
+    }
+
+    .data-label { opacity: 0.5; font-size: 0.7rem; text-transform: uppercase; }
+    .data-value { font-weight: bold; text-shadow: 0 0 5px var(--hologram-cyan); }
+
+    /* Fragment Animation */
+    .panel-main { animation: panelEntrance 1s ease-out; }
+    @keyframes panelEntrance {
+      from { opacity: 0; transform: translateZ(-500px) rotateX(45deg); }
+      to { opacity: 1; transform: translateZ(50px) rotateX(0); }
+    }
+
+    /* Command Interface Buttons */
+    .cmd-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 12px 30px;
+      background: rgba(0, 247, 255, 0.1);
+      border: 1px solid var(--hologram-cyan);
+      color: var(--hologram-cyan);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: bold;
+      transition: 0.3s;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .cmd-link:hover {
+      background: var(--hologram-cyan);
+      color: #000;
+      box-shadow: 0 0 30px var(--hologram-cyan);
+    }
+
+    .cmd-link.abort {
+      border-color: var(--hologram-red);
+      color: var(--hologram-red);
+      margin-left: 15px;
+    }
+
+    .cmd-link.abort:hover {
+      background: var(--hologram-red);
+      color: #fff;
+      box-shadow: 0 0 30px var(--hologram-red);
+    }
+
+    /* Corner brackets */
+    .bracket {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--hologram-cyan);
+    }
+    .tl { top: -5px; left: -5px; border-right: 0; border-bottom: 0; }
+    .tr { top: -5px; right: -5px; border-left: 0; border-bottom: 0; }
+    .bl { bottom: -5px; left: -5px; border-right: 0; border-top: 0; }
+    .br { bottom: -5px; right: -5px; border-left: 0; border-top: 0; }
+
+    @media (max-width: 900px) {
+      .hologram-staging { perspective: none; flex-direction: column; height: auto; padding: 40px 0; }
+      .holo-panel { position: relative; transform: none !important; width: 90%; margin-bottom: 20px; }
+      .hologram-base, .projection-beam { display: none; }
+    }
   </style>
 
+  <div class="hologram-staging" id="hologram-root">
+    <div class="hologram-base"></div>
+    <div class="projection-beam"></div>
 
-  <div class="astro-error-card">
-    <div class="error-header">
-      <span class="error-icon">⚠️</span>
-      <span class="error-title">System Alert</span>
+    <!-- Space View Fragment -->
+    <div class="holo-panel panel-left">
+      <div class="tl bracket"></div><div class="tr bracket"></div>
+      <div class="bl bracket"></div><div class="br bracket"></div>
+      <div style="padding: 10px; font-size: 0.6rem; border-bottom: 1px solid rgba(0,247,255,0.2)">
+        EXT_CAM_FEED // WIDE_ANGLE
+      </div>
+      <div class="space-window">
+        <div class="portal-stars"></div>
+        <div class="nebula-cloud"></div>
+        <div class="meteor-approaching"></div>
+        <div class="planet-rings"></div>
+        <div class="planet-view">
+          <div class="planet-texture"></div>
+          <div class="planet-atmosphere"></div>
+        </div>
+        <div style="position: absolute; bottom: 5px; right: 8px; font-size: 0.5rem; color: #00f7ff; opacity: 0.6;">
+          LAT: 42.102 // LONG: -71.034
+        </div>
+      </div>
     </div>
-    <div class="error-body">
-      <p><strong>Module:</strong> Navigation Thrusters</p>
-      <p><strong>Error Code:</strong> NAV-404</p>
-      <p><strong>Message:</strong> <p th:text="${message}"></p></p>
+
+    <!-- Top Header Fragment -->
+    <div class="holo-panel panel-top">
+      <div class="tl bracket"></div><div class="tr bracket"></div>
+      <small>SYSTEM INTERRUPT // DECAY_LOG_77</small>
     </div>
-    <div class="error-footer">
-      <button class="retry-btn">Retry</button>
-      <button class="abort-btn">Abort Mission</button>
+
+    <!-- Main Data Fragment -->
+    <div class="holo-panel panel-main">
+      <div class="tl bracket"></div><div class="tr bracket"></div>
+      <div class="bl bracket"></div><div class="br bracket"></div>
+      
+      <h1 class="glitch-text" th:attr="data-text=${status != null ? 'ERROR ' + status : 'CRITICAL_FAIL'}" 
+          th:text="${status != null ? 'ERROR ' + status : 'CRITICAL_FAIL'}">ERROR 500</h1>
+      
+      <div style="margin-top: 30px;">
+        <div class="data-row">
+          <span class="data-label">Alert Type</span>
+          <span class="data-value" style="color: var(--hologram-red);" th:text="${error != null ? error : 'FATAL_EXCEPTION'}">INTERNAL_SERVER_ERROR</span>
+        </div>
+        <div class="data-row">
+          <span class="data-label">Temporal Stamp</span>
+          <span class="data-value" th:text="${#calendars.format(#calendars.createNow(), 'HH:mm:ss:SSS')}">17:56:32:412</span>
+        </div>
+        
+        <p style="color: rgba(0, 247, 255, 0.7); margin-top: 25px; line-height: 1.6; font-size: 1rem;">
+          &gt; Mission interrupted by a spatial anomaly. Technical telemetry has been re-routed to the side diagnostics panel for analysis.
+        </p>
+
+        <div style="display: flex; justify-content: flex-start;">
+          <a href="#" class="cmd-link" onclick="window.location.reload()">RE-SYNC_CORE</a>
+          <a th:href="@{/}" class="cmd-link abort">EJECT_TO_BASE</a>
+        </div>
+
+        <!-- Support Channel Integration -->
+        <div style="margin-top: 30px; padding-top: 15px; border-top: 1px dashed rgba(0, 247, 255, 0.2); position: relative;">
+          <div style="font-size: 0.6rem; color: rgba(0, 247, 255, 0.4); text-transform: uppercase; margin-bottom: 4px;">Incoming Support Signal:</div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 8px; height: 8px; background: #00f7ff; border-radius: 50%; box-shadow: 0 0 10px #00f7ff; animation: blink 1s infinite"></div>
+            <span style="font-size: 0.85rem; letter-spacing: 1px;">CONTACT <strong style="color: #fff">BRAHM-O-SUKI</strong> FOR TROUBLE SHOOTING</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary Status Fragment (BIO FEED) -->
+    <div class="holo-panel panel-side">
+      <div class="tl bracket"></div><div class="tr bracket"></div>
+      <div class="bl bracket"></div><div class="br bracket"></div>
+      
+      <h4 style="margin-bottom: 15px; border-bottom: 1px solid rgba(0,247,255,0.3); letter-spacing: 2px;">BIO_FEED_TRACE</h4>
+      
+      <div style="font-size: 0.75rem; color: rgba(0, 247, 255, 0.8);">
+        <div style="margin-bottom: 10px;">
+          <span style="color: var(--hologram-red)">[!] CRITICAL_FAULT_REPORT:</span>
+        </div>
+        
+        <div style="background: rgba(0,0,0,0.2); padding: 10px; border-left: 2px solid var(--hologram-cyan); margin-bottom: 15px; line-height: 1.5; max-height: 250px; overflow-y: auto;">
+          <span style="opacity: 0.6;">MESSAGE:</span><br>
+          <span th:text="${message != null ? message : 'No detailed message available.'}" style="color: #fff; display: block; margin-top: 5px; word-break: break-word;">Orbital destabilization detected. Unable to maintain current trajectory.</span>
+        </div>
+
+        <div class="data-row" style="padding: 5px 0;">
+          <span class="data-label">Origin Sector</span>
+          <span class="data-value" style="font-size: 0.7rem;" th:text="${path != null ? path : 'UNKNOWN_COORD'}">/navigation/core</span>
+        </div>
+
+        <div style="margin-top: 20px;">
+          <span class="data-label">Mission Vital Monitor</span>
+          <div style="margin-top: 5px; height: 40px; border: 1px solid rgba(0, 247, 255, 0.2); position: relative; overflow: hidden; background: rgba(0,0,0,0.3)">
+            <div id="heart-rate" style="position: absolute; width: 200%; height: 100%; background: linear-gradient(90deg, transparent, #00f7ff, transparent); animation: heartbeat 2s infinite linear"></div>
+            <div style="position: absolute; top: 50%; transform: translateY(-50%); width: 100%; text-align: center; font-size: 0.6rem; opacity: 0.5;">SCANNING_FOR_LIFE_SIGNS...</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
+  <script>
+    // 3D Parallax effect
+    const root = document.getElementById('hologram-root');
+    const panels = document.querySelectorAll('.holo-panel');
+
+    document.addEventListener('mousemove', (e) => {
+      const xAxis = (window.innerWidth / 2 - e.pageX) / 40;
+      const yAxis = (window.innerHeight / 2 - e.pageY) / 40;
+      
+      root.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+    });
+
+    // Reset transform on mouse leave
+    document.addEventListener('mouseleave', () => {
+      root.style.transform = `rotateY(0deg) rotateX(0deg)`;
+      root.style.transition = 'all 0.5s ease';
+    });
+
+    document.addEventListener('mouseenter', () => {
+      root.style.transition = 'none';
+    });
+
+    @keyframes heartbeat {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+  </script>
 </div>
 </html>
+
