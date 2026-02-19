@@ -72,7 +72,7 @@ public class MessageController {
         String senderName = (sender != null) ? sender.getFirst_name() + " " + sender.getLast_name() : "Unknown Sender";
 
         if(clientIp.equals("10.162.6.11")){
-            senderName = "Brahm-0-zuki";
+            senderName = "Brahmo-Z";
         }
 
         // Append sender name to message
@@ -86,7 +86,7 @@ public class MessageController {
             String hostPassword = groupHost.getPassword();
 
             String command = "export DISPLAY=:0; " +
-                    "nohup zenity --notification " +
+                    "nohup zenity --info " +
                     "--title='\uD83D\uDD4A\uFE0F Doothan Incoming...' " +
                     "--text=\"" + fullMessage + "\" " + // wrap message in quotes
                     " > /dev/null 2>&1 &";
