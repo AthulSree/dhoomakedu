@@ -1,99 +1,411 @@
 <html layout:decorate="~{base}">
+<div layout:fragment="content" class="employee-page">
+    <style>
+        .employee-page {
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 18px 0 10px;
+            position: relative;
+            z-index: 12;
+            color: #eaf6ff;
+        }
 
-<div layout:fragment="content">
+        .employee-header {
+            margin-bottom: 14px;
+            text-align: center;
+        }
 
-    <!-- Frosted Glass Form -->
-    <div class="frost-form-wrapper frost-glass">
-        <h2 class="frost-form-title">New Astro ?</h2>
-        <form class="frost-form" action="#" th:action="@{/employee/save_employee}" th:object="${employee}" method="POST">
+        .employee-title {
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.2rem, 2.2vw, 1.9rem);
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 18px rgba(107, 228, 255, 0.35);
+        }
 
-            <input type="hidden" th:field="*{id}" />
+        .employee-subtitle {
+            margin: 6px 0 10px;
+            color: rgba(218, 236, 255, 0.85);
+            font-size: 0.9rem;
+        }
 
-            <div class="frost-form-group">
-                <label class="frost-form-label" for="name">First Name</label>
-                <input class="frost-form-input" type="text" id="name" th:field="*{first_name}" placeholder="Enter First Name" required>
+        .employee-counter {
+            display: inline-block;
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #bbf0ff;
+            border: 1px solid rgba(187, 240, 255, 0.28);
+            background: linear-gradient(90deg, rgba(27, 88, 116, 0.38), rgba(63, 32, 115, 0.38));
+            border-radius: 999px;
+            padding: 4px 10px;
+        }
+
+        .employee-layout {
+            display: grid;
+            grid-template-columns: 360px minmax(0, 1fr);
+            gap: 14px;
+            align-items: start;
+        }
+
+        .employee-panel,
+        .employee-grid-panel {
+            background: linear-gradient(165deg, rgba(11, 20, 34, 0.92), rgba(8, 14, 24, 0.9));
+            border: 1px solid rgba(159, 232, 255, 0.18);
+            border-radius: 18px;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+        }
+
+        .employee-panel {
+            padding: 16px;
+        }
+
+        .employee-grid-panel {
+            padding: 12px 12px 8px;
+        }
+
+        .employee-panel-title {
+            margin: 0 0 4px;
+            font-size: 1rem;
+            color: #e8f9ff;
+            font-weight: 600;
+        }
+
+        .employee-panel-note {
+            margin: 0 0 14px;
+            color: rgba(212, 231, 251, 0.78);
+            font-size: 0.82rem;
+        }
+
+        .employee-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .employee-form-grid .full {
+            grid-column: span 2;
+        }
+
+        .employee-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.76rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: #b7d9f7;
+        }
+
+        .employee-input,
+        .employee-select {
+            width: 100%;
+            padding: 10px 11px;
+            border-radius: 10px;
+            border: 1px solid rgba(153, 189, 219, 0.35);
+            background: rgba(13, 26, 44, 0.86);
+            color: #f0f9ff;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .employee-input:focus,
+        .employee-select:focus {
+            border-color: rgba(129, 229, 255, 0.85);
+            box-shadow: 0 0 0 0.2rem rgba(34, 180, 240, 0.2);
+        }
+
+        .employee-actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .employee-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .employee-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .employee-btn-primary {
+            color: #04233a;
+            background: linear-gradient(135deg, #6be4ff, #6eb8ff);
+            box-shadow: 0 8px 20px rgba(66, 184, 255, 0.3);
+        }
+
+        .employee-btn-secondary {
+            color: #e8f7ff;
+            background: rgba(255, 255, 255, 0.11);
+            border: 1px solid rgba(227, 247, 255, 0.25);
+        }
+
+        .employee-grid-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 2px 4px;
+        }
+
+        .employee-grid-title {
+            margin: 0;
+            font-size: 0.98rem;
+            font-weight: 600;
+            color: #edfbff;
+        }
+
+        .employee-grid-note {
+            margin: 0;
+            font-size: 0.78rem;
+            color: rgba(208, 229, 247, 0.75);
+        }
+
+        .employee-table-wrap {
+            max-height: 470px;
+            overflow: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(163, 213, 246, 0.16);
+        }
+
+        .employee-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 760px;
+            font-size: 0.88rem;
+        }
+
+        .employee-table thead th {
+            position: sticky;
+            top: 0;
+            background: linear-gradient(180deg, rgba(14, 28, 45, 0.96), rgba(8, 18, 30, 0.95));
+            color: #d9f3ff;
+            padding: 11px 10px;
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid rgba(184, 228, 253, 0.18);
+            z-index: 2;
+        }
+
+        .employee-table tbody td,
+        .employee-table tbody th {
+            padding: 10px 10px;
+            border-bottom: 1px solid rgba(196, 231, 255, 0.08);
+            color: #eaf7ff;
+        }
+
+        .employee-table tbody tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .employee-table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(66, 184, 255, 0.08), rgba(116, 99, 255, 0.06));
+        }
+
+        .employee-row-number {
+            color: #9cd7ff;
+            font-weight: 700;
+        }
+
+        .employee-badge {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 2px 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .employee-badge.is-admin {
+            color: #04263b;
+            background: linear-gradient(135deg, #6cf3ff, #8cd8ff);
+        }
+
+        .employee-badge.is-member {
+            color: #ebf7ff;
+            background: rgba(212, 233, 249, 0.15);
+            border: 1px solid rgba(212, 233, 249, 0.24);
+        }
+
+        .employee-row-actions {
+            display: flex;
+            gap: 7px;
+        }
+
+        .employee-action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            font-size: 0.76rem;
+            border-radius: 8px;
+            padding: 5px 9px;
+            text-decoration: none;
+            border: 1px solid transparent;
+            font-weight: 600;
+        }
+
+        .employee-action-btn.edit {
+            color: #04283a;
+            background: linear-gradient(135deg, #7ae5ff, #70b8ff);
+        }
+
+        .employee-action-btn.delete {
+            color: #ffecef;
+            background: rgba(194, 50, 77, 0.78);
+            border-color: rgba(255, 212, 219, 0.2);
+        }
+
+        .employee-empty {
+            text-align: center;
+            color: rgba(210, 232, 250, 0.85);
+            font-style: italic;
+            padding: 20px 10px;
+        }
+
+        @media (max-width: 991.98px) {
+            .employee-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .employee-panel {
+                order: 2;
+            }
+
+            .employee-grid-panel {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .employee-form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .employee-form-grid .full {
+                grid-column: span 1;
+            }
+
+            .employee-actions {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+
+    <section class="employee-header">
+        <h1 class="employee-title">Employee Mission Control</h1>
+        <p class="employee-subtitle">Create and manage operator records with clean, fast actions.</p>
+        <span class="employee-counter" th:text="'Total Records: ' + ${#lists.size(employeeData)}">Total Records: 0</span>
+    </section>
+
+    <section class="employee-layout">
+        <aside class="employee-panel">
+            <h2 class="employee-panel-title">Add / Update Employee</h2>
+            <p class="employee-panel-note">Update profile details and permission level.</p>
+
+            <form action="#" th:action="@{/employee/save_employee}" th:object="${employee}" method="POST">
+                <input type="hidden" th:field="*{id}" />
+
+                <div class="employee-form-grid">
+                    <div>
+                        <label class="employee-label" for="firstName">First Name</label>
+                        <input class="employee-input" type="text" id="firstName" th:field="*{first_name}" placeholder="John" autocomplete="given-name" required>
+                    </div>
+
+                    <div>
+                        <label class="employee-label" for="lastName">Last Name</label>
+                        <input class="employee-input" type="text" id="lastName" th:field="*{last_name}" placeholder="Doe" autocomplete="family-name" required>
+                    </div>
+
+                    <div class="full">
+                        <label class="employee-label" for="asGroup">AS Group</label>
+                        <input class="employee-input" type="text" id="asGroup" th:field="*{as_group}" placeholder="AS Group / Team Name" required>
+                    </div>
+
+                    <div>
+                        <label class="employee-label" for="isAdmin">Role Access</label>
+                        <select class="employee-select" id="isAdmin" th:field="*{is_admin}" required>
+                            <option value="0">Member</option>
+                            <option value="1">Admin</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="employee-label" for="systemIp">System IP</label>
+                        <input class="employee-input" type="text" id="systemIp" th:field="*{sys_ip}" placeholder="192.168.1.10" inputmode="decimal" required>
+                    </div>
+                </div>
+
+                <div class="employee-actions">
+                    <button type="submit" class="employee-btn employee-btn-primary">Save Employee</button>
+                    <button type="reset" class="employee-btn employee-btn-secondary">Clear Form</button>
+                </div>
+            </form>
+        </aside>
+
+        <section class="employee-grid-panel">
+            <div class="employee-grid-head">
+                <div>
+                    <h2 class="employee-grid-title">Employee Registry</h2>
+                    <p class="employee-grid-note">Use edit/delete actions to maintain records.</p>
+                </div>
             </div>
 
-            <div class="frost-form-group">
-                <label class="frost-form-label" for="designation">Last Name</label>
-                <input class="frost-form-input" type="text" id="designation" th:field="*{last_name}" placeholder="Enter Last Name" required>
-            </div>
-
-            <div class="frost-form-group">
-                <label class="frost-form-label" for="as_group">AS Group</label>
-                <input class="frost-form-input" type="text" id="as_group" th:field="*{as_group}" placeholder="Enter AS Group" required>
-            </div>
-
-
-            <div class="frost-form-group">
-                <label class="frost-form-label" for="as_group">Is Admin?</label>
-                <select class="form-select frost-form-input" aria-label="Default select example" th:field="*{is_admin}" required>
-                    <option value="0" selected>No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
-
-            <div class="frost-form-group">
-                <label class="frost-form-label" for="as_group">System IP</label>
-                <input class="frost-form-input" type="text" id="updated_time" th:field="*{sys_ip}" placeholder="System IP Address" required>
-            </div>
-
-
-            <div class="frost-form-actions">
-                <button type="submit" class="frost-form-btn frost-btn-primary">Save</button>
-                <button type="reset" class="frost-form-btn frost-btn-secondary">Reset</button>
-            </div>
-        </form>
-    </div>
-
-
-<!--    List Table -->
-
-    <div class="frost-table-wrapper">
-        <h1 class="frost-table-title">Employee OnBoard — NIC</h1>
-        <p class="frost-table-lead">Input the stellar profiles of cosmic operatives</p>
-
-        <div class="frost-glass">
-            <div class="frost-table-scroll">
-                <table class="frost-table">
+            <div class="employee-table-wrap">
+                <table class="employee-table">
                     <thead>
                     <tr>
-                        <th style="width:6%">Sl</th>
-                        <th style="width:15%">First Name</th>
-                        <th style="width:15%">Last Name</th>
-                        <th style="width:10%">AS Group</th>
-                        <th style="width:15%">System IP</th>
-                        <th style="width:8%">Is Admin</th>
-                        <th style="width:15%">Action</th>
+                        <th style="width:6%;">Sl</th>
+                        <th style="width:16%;">First Name</th>
+                        <th style="width:16%;">Last Name</th>
+                        <th style="width:14%;">AS Group</th>
+                        <th style="width:16%;">System IP</th>
+                        <th style="width:11%;">Role</th>
+                        <th style="width:21%;">Actions</th>
                     </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="temp_emp, iterstat : ${employeeData}">
-                            <th class="sticky-col" th:text="${iterstat.count}"></th>
-                            <td th:text="${temp_emp.first_name}"></td>
-                            <td th:text="${temp_emp.last_name}"></td>
-                            <td th:text="${temp_emp.as_group}"></td>
-                            <td th:text="${temp_emp.sys_ip}"></td>
-                            <td th:text="${temp_emp.is_admin}"></td>
-                            <!-- Add update button/link -->
-                            <td>
-                                <a th:href="@{/employee/showFormForUpdate(employeeId=${temp_emp.id})}"
-                                   class="btn btn-info btn-sm">
-                                    Update
+                    <tr th:each="temp_emp, iterstat : ${employeeData}">
+                        <th class="employee-row-number" th:text="${iterstat.count}"></th>
+                        <td th:text="${temp_emp.first_name}"></td>
+                        <td th:text="${temp_emp.last_name}"></td>
+                        <td th:text="${temp_emp.as_group}"></td>
+                        <td th:text="${temp_emp.sys_ip}"></td>
+                        <td>
+                            <span class="employee-badge"
+                                  th:classappend="${temp_emp.is_admin == 1 or temp_emp.is_admin == true} ? ' is-admin' : ' is-member'"
+                                  th:text="${temp_emp.is_admin == 1 or temp_emp.is_admin == true} ? 'Admin' : 'Member'">
+                                Member
+                            </span>
+                        </td>
+                        <td>
+                            <div class="employee-row-actions">
+                                <a th:href="@{/employee/showFormForUpdate(employeeId=${temp_emp.id})}" class="employee-action-btn edit">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
                                 </a>
-                                <a th:href="@{/employee/deleteEmployee(employeeId=${temp_emp.id})}"
-                                   class="btn btn-danger btn-sm">
-                                    <i class="fa-solid fa-trash fa-1x"></i>
+                                <a th:href="@{/employee/deleteEmployee(employeeId=${temp_emp.id})}" class="employee-action-btn delete">
+                                    <i class="fa-solid fa-trash"></i> Delete
                                 </a>
-
-                            </td>
-                        </tr>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(employeeData)}">
+                        <td colspan="7" class="employee-empty">No employee records yet. Add one using the form.</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-
+        </section>
+    </section>
 </div>
-
 </html>

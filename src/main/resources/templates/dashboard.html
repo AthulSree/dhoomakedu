@@ -1,47 +1,205 @@
-
 <html layout:decorate="~{base}">
+<div layout:fragment="content" class="dashboard-shell">
+    <style>
+        .dashboard-shell {
+            width: 100%;
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 24px 0 10px;
+            position: relative;
+            z-index: 12;
+        }
 
-<div layout:fragment="content" class="splash-padding">
-    <div class="row justify-content-center align-items-center g-5">
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card d-flex justify-content-center align-items-center">
-                <a th:href="@{/employee/manage}"><i class="fa-solid fa-user fa-4x text-white cosmic-icon-9"></i></a>
+        .dashboard-top {
+            text-align: center;
+            margin-bottom: 24px;
+            animation: dashboardFadeIn 0.55s ease-out both;
+        }
+
+        .dashboard-kicker {
+            display: inline-block;
+            padding: 4px 10px;
+            margin-bottom: 8px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            color: #cff6ff;
+            background: linear-gradient(90deg, rgba(16, 185, 255, 0.18), rgba(168, 85, 247, 0.18));
+            border: 1px solid rgba(207, 246, 255, 0.25);
+            text-transform: uppercase;
+        }
+
+        .dashboard-title {
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.2rem, 2.4vw, 2rem);
+            letter-spacing: 0.06em;
+            color: #e7f9ff;
+            text-shadow: 0 0 18px rgba(0, 191, 255, 0.4);
+        }
+
+        .dashboard-subtitle {
+            margin: 6px auto 0;
+            max-width: 680px;
+            color: rgba(220, 235, 255, 0.85);
+            font-size: 0.92rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .dashboard-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-between;
+            min-height: 150px;
+            padding: 16px 14px;
+            border-radius: 18px;
+            text-decoration: none;
+            background: linear-gradient(170deg, rgba(18, 28, 42, 0.88), rgba(8, 16, 28, 0.88));
+            border: 1px solid rgba(159, 232, 255, 0.18);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            animation: dashboardFadeIn 0.55s ease-out both;
+        }
+
+        .dashboard-tile:hover {
+            transform: translateY(-4px);
+            border-color: rgba(159, 232, 255, 0.45);
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45);
+        }
+
+        .dashboard-tile:nth-child(2) { animation-delay: 0.05s; }
+        .dashboard-tile:nth-child(3) { animation-delay: 0.1s; }
+        .dashboard-tile:nth-child(4) { animation-delay: 0.15s; }
+        .dashboard-tile:nth-child(5) { animation-delay: 0.2s; }
+        .dashboard-tile:nth-child(6) { animation-delay: 0.25s; }
+
+        .dashboard-icon {
+            font-size: 2.1rem;
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+
+        .dashboard-label {
+            color: #f4fbff;
+            font-weight: 600;
+            font-size: 1rem;
+            margin: 0 0 4px;
+        }
+
+        .dashboard-note {
+            margin: 0;
+            color: rgba(221, 235, 255, 0.8);
+            font-size: 0.82rem;
+            line-height: 1.3;
+        }
+
+        .typewriter-container {
+            margin-top: 18px;
+            display: flex;
+            justify-content: center;
+        }
+
+        @keyframes dashboardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .dashboard-shell {
+                padding-top: 12px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-tile {
+                min-height: 132px;
+            }
+
+            .dashboard-title {
+                letter-spacing: 0.03em;
+            }
+        }
+    </style>
+
+    <section class="dashboard-top">
+        <p class="dashboard-kicker">Control Panel</p>
+        <h1 class="dashboard-title">Gravity Operations Console</h1>
+        <p class="dashboard-subtitle">Manage people, leaves, documents, attendance and communications from one launchpad.</p>
+    </section>
+
+    <section class="dashboard-grid">
+        <a class="dashboard-tile" th:href="@{/employee/manage}">
+            <i class="fa-solid fa-user cosmic-icon-9 dashboard-icon" aria-hidden="true"></i>
+            <div>
+                <p class="dashboard-label">Employees</p>
+                <p class="dashboard-note">Add, edit and organize employee records.</p>
             </div>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card d-flex justify-content-center align-items-center">
-                <a th:href="@{/leaves/manage}"><i class="fa-brands fa-pagelines fa-4x text-white cosmic-icon-6"></i></a>
+        </a>
+
+        <a class="dashboard-tile" th:href="@{/leaves/manage}">
+            <i class="fa-brands fa-pagelines cosmic-icon-6 dashboard-icon" aria-hidden="true"></i>
+            <div>
+                <p class="dashboard-label">Leaves</p>
+                <p class="dashboard-note">Track leave balances and requests quickly.</p>
             </div>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card d-flex justify-content-center align-items-center">
-                <a th:href="@{/pdf/genPdf}"><i class="fa-solid fa-file-arrow-down cosmic-icon-3 fa-4x text-white cosmic-icon-7"></i></a>
+        </a>
+
+        <a class="dashboard-tile" th:href="@{/pdf/genPdf}">
+            <i class="fa-solid fa-file-arrow-down cosmic-icon-7 dashboard-icon" aria-hidden="true"></i>
+            <div>
+                <p class="dashboard-label">Generate PDF</p>
+                <p class="dashboard-note">Export reports and forms in one click.</p>
             </div>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card d-flex justify-content-center align-items-center">
-                <a href="https://fmskl.attendance.gov.in/update/emplogin" target="_blank"><i class="fa-solid fa-diamond-turn-right fa-4x text-white  cosmic-icon-2"></i></a>
+        </a>
+
+        <a class="dashboard-tile" href="https://fmskl.attendance.gov.in/update/emplogin" target="_blank" rel="noopener noreferrer">
+            <i class="fa-solid fa-diamond-turn-right cosmic-icon-2 dashboard-icon" aria-hidden="true"></i>
+            <div>
+                <p class="dashboard-label">Attendance Portal</p>
+                <p class="dashboard-note">Open the external attendance login page.</p>
             </div>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card d-flex justify-content-center align-items-center">
-                <a th:href="@{/workorder/manage}"><i class="fa-solid fa-file-word fa-4x text-white  cosmic-icon-5"></i></a>
+        </a>
+
+        <a class="dashboard-tile" th:href="@{/workorder/manage}">
+            <i class="fa-solid fa-file-word cosmic-icon-5 dashboard-icon" aria-hidden="true"></i>
+            <div>
+                <p class="dashboard-label">Work Orders</p>
+                <p class="dashboard-note">Create and maintain work order documents.</p>
             </div>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card d-flex justify-content-center align-items-center">
-                <a th:href="@{/message/msgLander}"><i class="fa-solid fa-message fa-4x text-white  cosmic-icon-5"></i></a>
+        </a>
+
+        <a class="dashboard-tile" th:href="@{/message/msgLander}">
+            <i class="fa-solid fa-message cosmic-icon-5 dashboard-icon" aria-hidden="true"></i>
+            <div>
+                <p class="dashboard-label">Messages</p>
+                <p class="dashboard-note">Prepare and send communication updates.</p>
             </div>
-        </div>
+        </a>
+    </section>
+
+    <div class="typewriter-container">
+        <h2 class="typewriter-text">Into the Gravity of Brahm-o-Suki</h2>
     </div>
-    <div class="row">
-        <div class="typewriter-container">
-            <h1 class="typewriter-text">Into the Gravity of Brahm-o-Suki</h1>
-        </div>
-
-    </div>
-
-
 </div>
 
 
