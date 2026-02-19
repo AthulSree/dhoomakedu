@@ -84,7 +84,7 @@ public class leavesController {
         leaves chkAvail = theLeaveService.findByEmpIdAndLeaveMpMonthAndLeaveMpYear(theLeaveDto.getEmpId(),
                 theLeaveDto.getLeaveMpMonth(), theLeaveDto.getLeaveMpYear());
         if (chkAvail != null && theLeaveDto.getId() == null) {
-            throw new IllegalStateException("The Leave Already Exists. Try Updating Leave Details.");
+            throw new IllegalStateException("The Leave Already Exists. Try Updating the existing Leave Details.");
         }
 
         leaves theSavedLeave;

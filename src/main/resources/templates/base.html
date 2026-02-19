@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!--  <link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">-->
   <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
-  <title>Gravity of Brahm-o-suki</title>
+  <title>Gravity of Brahmo-Z</title>
   <!-- Bootstrap 5 CSS CDN -->
 
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"  crossorigin="anonymous">
@@ -71,6 +71,32 @@
 <script th:src="@{/js/bootstrap.bundle.min.js}" crossorigin="anonymous"></script>
 
 <!-- Include Orbitron font for rocket smoke -->
+<!-- Cosmic Mini Dock -->
+<nav class="cosmic-mini-dock">
+  <a th:href="@{/}" class="dock-item" title="Dashboard">
+    <i class="fa-solid fa-house"></i>
+  </a>
+  <div class="dock-divider"></div>
+  <a th:href="@{/employee/manage}" class="dock-item" title="Employees">
+    <i class="fa-solid fa-user"></i>
+  </a>
+  <a th:href="@{/leaves/manage}" class="dock-item" title="Leaves">
+    <i class="fa-brands fa-pagelines"></i>
+  </a>
+  <a th:href="@{/pdf/genPdf}" class="dock-item" title="Generate PDF">
+    <i class="fa-solid fa-file-arrow-down"></i>
+  </a>
+  <a th:href="@{/workorder/manage}" class="dock-item" title="Work Orders">
+    <i class="fa-solid fa-file-word"></i>
+  </a>
+  <a th:href="@{/message/msgLander}" class="dock-item" title="Messages">
+    <i class="fa-solid fa-message"></i>
+  </a>
+  <div class="dock-divider"></div>
+  <a href="https://fmskl.attendance.gov.in/update/emplogin" target="_blank" rel="noopener noreferrer" class="dock-item" title="Attendance Portal">
+    <i class="fa-solid fa-diamond-turn-right"></i>
+  </a>
+</nav>
 
 </body>
 </html>
