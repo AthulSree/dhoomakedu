@@ -405,8 +405,8 @@
           <span class="data-value" th:text="${#calendars.format(#calendars.createNow(), 'HH:mm:ss:SSS')}">17:56:32:412</span>
         </div>
         
-        <p style="color: rgba(0, 247, 255, 0.7); margin-top: 25px; line-height: 1.6; font-size: 1rem;">
-          &gt; Mission interrupted by a spatial anomaly. Technical telemetry has been re-routed to the side diagnostics panel for analysis.
+        <p th:text="${message != null ? message : 'No detailed message available.'}" style="color: rgba(0, 247, 255, 0.7); margin-top: 25px; line-height: 1.6; font-size: 1rem;">
+          <!-- &gt;  -->
         </p>
 
         <div style="display: flex; justify-content: flex-start;">
@@ -439,7 +439,7 @@
         
         <div style="background: rgba(0,0,0,0.2); padding: 10px; border-left: 2px solid var(--hologram-cyan); margin-bottom: 15px; line-height: 1.5; max-height: 250px; overflow-y: auto;">
           <span style="opacity: 0.6;">MESSAGE:</span><br>
-          <span th:text="${message != null ? message : 'No detailed message available.'}" style="color: #fff; display: block; margin-top: 5px; word-break: break-word;">Orbital destabilization detected. Unable to maintain current trajectory.</span>
+          <span style="color: #fff; display: block; margin-top: 5px; word-break: break-word;">Orbital destabilization detected. Unable to maintain current trajectory.</span>
         </div>
 
         <div class="data-row" style="padding: 5px 0;">

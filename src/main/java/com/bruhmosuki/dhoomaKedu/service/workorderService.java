@@ -36,16 +36,8 @@ public class workorderService {
     }
 
     public workorder findByEmpId(employee employeeData){
-        Optional<workorder> result = Optional.ofNullable(workorderRepository.findByEmpId(employeeData));
-        workorder theWorkorder = null;
-        if(result.isPresent()){
-            theWorkorder = result.get();
-        }else{
-            throw new RuntimeException("Work order not found for id "+employeeData.getId());
-        }
-        return theWorkorder;
+        return workorderRepository.findByEmpId(employeeData);
     }
-
 
 
     public void save(workorder theWorkorder){
@@ -55,4 +47,5 @@ public class workorderService {
     public void delete(int theInt){
         workorderRepository.deleteById(theInt);
     }
+    
 }

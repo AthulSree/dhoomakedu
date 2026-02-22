@@ -1,0 +1,473 @@
+<html layout:decorate="~{base}" xmlns:th="http://www.thymeleaf.org">
+<div layout:fragment="content" class="dossier-root">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;700&family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@300;500&display=swap');
+
+        :root {
+            --accent-primary: #00d2ff;
+            --accent-secondary: #00e5ff;
+            --text-main: #eaf6ff;
+            --glass-base: rgba(10, 20, 35, 0.65);
+            --card-border: rgba(0, 210, 255, 0.25);
+            --glow-color: rgba(0, 210, 255, 0.15);
+        }
+
+        .dossier-root {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            perspective: 1200px;
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+        }
+
+        /* --- Ambient HUD Effects --- */
+        .ambient-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 210, 255, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* --- Header Section --- */
+        .dossier-header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: slideDownFade 1s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .dossier-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.4rem;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .dossier-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 900;
+            letter-spacing: 0.15rem;
+            margin: 0;
+            background: linear-gradient(135deg, #fff 30%, var(--accent-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+        }
+
+        /* --- Dossier Layout --- */
+        .dossier-container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* --- Profile Card (Left) --- */
+        .profile-hero {
+            background: var(--glass-base);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            animation: slideInLeft 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+        }
+
+        .hero-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(0, 210, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--accent-primary);
+            box-shadow: 0 0 25px var(--glow-color);
+        }
+
+        .hero-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0 0 5px;
+            letter-spacing: 0.05rem;
+        }
+
+        .hero-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-primary);
+            margin-bottom: 25px;
+            opacity: 0.7;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px 5px;
+            border-radius: 12px;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .clearance-badge {
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            background: linear-gradient(90deg, rgba(0, 210, 255, 0.15), rgba(0, 229, 255, 0.05));
+            border: 1px solid var(--accent-primary);
+            box-shadow: 0 0 15px var(--glow-color);
+        }
+
+        /* --- Details Card (Right) --- */
+        .content-card {
+            background: var(--glass-base);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            animation: slideInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .section-h {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            color: var(--accent-primary);
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 210, 255, 0.15);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-group {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s ease;
+            position: relative;
+        }
+
+        .info-group:hover {
+            transform: scale(1.01);
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(0, 210, 255, 0.2);
+        }
+
+        /* --- Expiry Alert Styles --- */
+        .expiry-alert {
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 4px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.02rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+
+        .expiry-danger {
+            color: #fff;
+            background: rgba(255, 59, 105, 0.2);
+            border: 1px solid #ff3b69;
+            box-shadow: 0 0 20px rgba(255, 59, 105, 0.4), inset 0 0 10px rgba(255, 59, 105, 0.2);
+            animation: criticalGlow 1.5s infinite alternate;
+        }
+
+        @keyframes criticalGlow {
+            from { box-shadow: 0 0 10px rgba(255, 59, 105, 0.4); }
+            to { box-shadow: 0 0 25px rgba(255, 59, 105, 0.7); }
+        }
+
+        .expiry-warning {
+            color: #ff9f43;
+            background: rgba(255, 159, 67, 0.1);
+            border: 1px solid #ff9f43;
+            box-shadow: 0 0 15px rgba(255, 159, 67, 0.2);
+        }
+
+        .expiry-safe {
+            color: #2ecc71;
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid #2ecc71;
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.2);
+        }
+
+        .i-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.05rem;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .i-value {
+            font-size: 1.05rem;
+            color: #fff;
+            line-height: 1.4;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .value-hl {
+            color: var(--accent-primary);
+            font-weight: 700;
+        }
+
+        /* --- Footer --- */
+        .dossier-actions {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-astro {
+            padding: 12px 35px;
+            border-radius: 14px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary-astro {
+            background: linear-gradient(135deg, var(--accent-primary), #00a8ff);
+            color: #041221;
+            box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3);
+            border: none;
+        }
+
+        .btn-primary-astro:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 210, 255, 0.45);
+        }
+
+        /* --- Empty State --- */
+        .empty-well {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 59, 105, 0.04);
+            border: 1px dashed rgba(255, 59, 105, 0.3);
+            border-radius: 20px;
+            grid-column: span 2;
+        }
+
+        .warning-ico {
+            font-size: 2.5rem;
+            color: #ff3b69;
+            margin-bottom: 15px;
+            animation: pulseWarning 2s infinite;
+        }
+
+        /* --- Animations --- */
+        @keyframes slideDownFade {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseWarning {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        @media (max-width: 900px) {
+            .dossier-container {
+                grid-template-columns: 1fr;
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+        }
+    </style>
+
+    <div class="ambient-glow"></div>
+
+    <header class="dossier-header">
+        <p class="dossier-sub">Dossier Access // Authorized</p>
+        <h1 class="dossier-title">PERSONNEL RECORD</h1>
+    </header>
+
+    <main class="dossier-container">
+        <!-- Profile Column -->
+        <aside class="profile-hero">
+            <div class="hero-avatar">
+                <i class="fa-solid fa-user-astronaut"></i>
+            </div>
+            <h2 class="hero-name" th:text="${loggedUser.first_name + ' ' + loggedUser.last_name}">OPERATOR NAME</h2>
+            <p class="hero-id">ID: 000[[${loggedUser.id}]] // SYS_AUTH</p>
+
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Sector</span>
+                    <span class="stat-value" th:text="${loggedUser.as_group}">ASG2</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Net State</span>
+                    <span class="stat-value" th:text="${loggedUser.sys_ip}">192.168.1</span>
+                </div>
+            </div>
+
+            <div class="clearance-badge" th:classappend="${loggedUser.is_admin} ? 'admin-glow' : ''">
+                <span th:text="${loggedUser.is_admin} ? 'Level 1 Admin' : 'Field Operator'">Standard Operator</span>
+            </div>
+
+            <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                <span class="stat-label">Protocol Status</span>
+                <span class="stat-value" style="color: var(--accent-primary); font-size: 0.8rem;">SECURE_HANDSHAKE_OK</span>
+            </div>
+        </aside>
+
+        <!-- Details Column -->
+        <section class="content-card">
+            <h2 class="section-h"><i class="fa-solid fa-satellite"></i> Active Assignment Data</h2>
+            
+            <div th:if="${emp_wo != null}" class="info-grid">
+                <div class="info-group full-width">
+                    <span class="i-label">Current Designation</span>
+                    <span class="i-value value-hl" th:text="${emp_wo.designation}">Senior Specialist // Tier 3 Ops</span>
+                </div>
+
+                <div class="info-group">
+                    <span class="i-label">Work Order Reference</span>
+                    <span class="i-value" th:text="${emp_wo.woNumber}">M2505806</span>
+                </div>
+
+                <div class="info-group">
+                    <span class="i-label">Project Identifier</span>
+                    <span class="i-value" th:text="${emp_wo.projectNo}">S250694GNKL</span>
+                </div>
+
+                <div class="info-group">
+                    <span class="i-label">Command Agency</span>
+                    <span class="i-value" th:text="${emp_wo.agency}">AEOLOGIC</span>
+                </div>
+
+                <div class="info-group">
+                    <span class="i-label">Induction Epoch</span>
+                    <span class="i-value" th:text="${emp_wo.joinDate}">2023-05-01</span>
+                </div>
+
+                <div class="info-group">
+                    <span class="i-label">Active Term Duration</span>
+                    <span class="i-value" th:text="${emp_wo.woFromDate + ' — ' + emp_wo.woToDate}">2025-09-01 — 2026-02-28</span>
+                </div>
+
+                <div class="info-group" th:if="${daysToExpiry != null}">
+                    <span class="i-label">Expiry Synchronization Status</span>
+                    <div class="i-value expiry-alert" 
+                         th:classappend="${daysToExpiry < 30} ? 'expiry-danger' : (${daysToExpiry < 60} ? 'expiry-warning' : 'expiry-safe')">
+                        <i class="fa-solid" 
+                           th:classappend="${daysToExpiry < 30} ? 'fa-skull-crossbones' : (${daysToExpiry < 60} ? 'fa-triangle-exclamation' : 'fa-shield-halved')"></i>
+                        <span th:text="${daysToExpiry + ' SOLAR_DAYS REMAINING'}">000 DAYS REMAINING</span>
+                    </div>
+                </div>
+
+                <div class="info-group">
+                    <span class="i-label">Floating Credits (Combo)</span>
+                    <span class="i-value value-hl" th:text="${emp_wo.comboLeaves}">14.0</span>
+                </div>
+
+                <div class="info-group">
+                    <span class="i-label">Last Registry Sync</span>
+                    <span class="i-value" style="font-size: 0.85rem; opacity: 0.7;" th:text="${#temporals.format(emp_wo.updatedTime, 'yyyy-MM-dd HH:mm:ss')}">2026-02-19 11:00:02</span>
+                </div>
+            </div>
+
+            <!-- Empty Assignment State -->
+            <div th:if="${emp_wo == null}" class="empty-well">
+                <i class="fa-solid fa-triangle-exclamation warning-ico"></i>
+                <h3 style="margin: 0 0 10px; font-family: 'Orbitron', sans-serif;">DEPLOYMENT_NOT_FOUND</h3>
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">No active work order associated with this operator ID. Contact Central Command for assignment deployment.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="dossier-actions">
+        <a th:href="@{/}" class="btn-astro btn-primary-astro">
+            <i class="fa-solid fa-house-rocket"></i> Return to Nav
+        </a>
+    </footer>
+</div>
+</html>
