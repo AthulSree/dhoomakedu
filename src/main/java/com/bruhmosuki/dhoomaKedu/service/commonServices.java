@@ -55,9 +55,10 @@ public class commonServices {
         // If it's localhost (IPv4 or IPv6), get the machine's actual IP address
         if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
             try {
-                InetAddress inetAddress = InetAddress.getLocalHost();
-                ip = inetAddress.getHostAddress();
-            } catch (UnknownHostException e) {
+                // InetAddress inetAddress = InetAddress.getLocalHost();
+                // ip = inetAddress.getHostAddress();
+                ip = "10.162.6.11";
+            } catch (Exception e) {
                 // If resolving fails, keep the loopback IP
                 e.printStackTrace();
             }

@@ -34,6 +34,7 @@ public class employeeController {
     @GetMapping("/manage")
     public String manage(Model model, HttpServletRequest request) {
         String userIp = theCommonServices.getUserIp(request);
+        System.out.println("................." + userIp);
         employee loggedUser = employeeService.findBySysIp(userIp);
         workorder emp_wo = theWorkorderService.findByEmpId(loggedUser);
         if (!loggedUser.getIs_admin()) {

@@ -23,3 +23,9 @@ public class DhoomaKeduApplication {
 //leaves
 
 
+// J VIOLET CRYSOLYTE
+// linux localhost - ip mapping not working
+// akal need Project Manager in db
+// akal - Date of MPR generation
+// Combo leave pending
+// Work order update error - "The Workorder Already Exists. Try Updating the existing Workorder Details."
