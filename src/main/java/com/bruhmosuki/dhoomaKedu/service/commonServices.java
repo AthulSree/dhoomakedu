@@ -1,10 +1,9 @@
 package com.bruhmosuki.dhoomaKedu.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -16,7 +15,10 @@ import java.util.Map;
 @Service
 public class commonServices {
 
-    public List<Map<String, String>> fetchLastThreeMonths(){
+    @Value("${developer.mock.ip:}")
+    private String developerMockIp;
+
+    public List<Map<String, String>> fetchLastThreeMonths() {
         YearMonth current = YearMonth.now();
         DateTimeFormatter labelFmt = DateTimeFormatter.ofPattern("MMMM yyyy");
 
@@ -34,33 +36,28 @@ public class commonServices {
         return lastThreeMonths;
     }
 
-    public String getUserIp(HttpServletRequest request){
+    public String getUserIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
-        if(ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
         }
-        if(ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("WL-Proxy-Client-IP");
         }
-        if(ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("HTTP_CLIENT_IP");
         }
-        if(ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("HTTP_X_FORWARDED_FOR");
         }
-        if(ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
 
-        // If it's localhost (IPv4 or IPv6), get the machine's actual IP address
+        // If it's localhost (IPv4 or IPv6), and we have a mock IP configured, use it
         if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
-            try {
-                // InetAddress inetAddress = InetAddress.getLocalHost();
-                // ip = inetAddress.getHostAddress();
-                ip = "10.162.6.11";
-            } catch (Exception e) {
-                // If resolving fails, keep the loopback IP
-                e.printStackTrace();
+            if (developerMockIp != null && !developerMockIp.isEmpty()) {
+                ip = developerMockIp;
             }
         }
 
