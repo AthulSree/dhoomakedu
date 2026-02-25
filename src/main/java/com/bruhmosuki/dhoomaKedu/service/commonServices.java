@@ -53,7 +53,7 @@ public class commonServices {
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
-
+        
         // If it's localhost (IPv4 or IPv6), and we have a mock IP configured, use it
         if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
             if (developerMockIp != null && !developerMockIp.isEmpty()) {

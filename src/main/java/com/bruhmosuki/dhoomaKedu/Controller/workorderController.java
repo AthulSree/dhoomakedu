@@ -49,8 +49,10 @@ public class workorderController {
 
     @PostMapping("/saveWorkorder")
     public String saveWo(@ModelAttribute("workorder") workorder theWorkorder){
+        System.out.println(">>>>>>>>>>>" + theWorkorder.getId() + "<<<<<<<<<<<<<<");
+        
         workorder chkAvail = theWorkorderService.findByEmpId(theWorkorder.getEmpId());
-        if(chkAvail != null){
+        if(chkAvail != null && theWorkorder.getId() == null){
             throw new IllegalStateException("The Workorder Already Exists. Try Updating the existing Workorder Details.");
         }
         theWorkorderService.save(theWorkorder);
