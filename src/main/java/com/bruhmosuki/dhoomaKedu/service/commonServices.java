@@ -1,6 +1,9 @@
 package com.bruhmosuki.dhoomaKedu.service;
 
 import org.springframework.stereotype.Service;
+
+import com.bruhmosuki.dhoomaKedu.exceptions.CustomAppException;
+
 import org.springframework.beans.factory.annotation.Value;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,11 +15,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 @Service
 public class commonServices {
 
     @Value("${developer.mock.ip:}")
     private String developerMockIp;
+
+
+    public void showError(String message) {
+        throw new CustomAppException(message);
+    }
 
     public List<Map<String, String>> fetchLastThreeMonths() {
         YearMonth current = YearMonth.now();
@@ -53,7 +62,7 @@ public class commonServices {
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
-        
+
         // If it's localhost (IPv4 or IPv6), and we have a mock IP configured, use it
         if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
             if (developerMockIp != null && !developerMockIp.isEmpty()) {

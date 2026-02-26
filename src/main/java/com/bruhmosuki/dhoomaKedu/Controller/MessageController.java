@@ -2,11 +2,14 @@ package com.bruhmosuki.dhoomaKedu.Controller;
 
 import org.springframework.ui.Model;
 import com.bruhmosuki.dhoomaKedu.service.sshService;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import com.bruhmosuki.dhoomaKedu.entity.groupHost;
 import com.bruhmosuki.dhoomaKedu.entity.employee;
 import com.bruhmosuki.dhoomaKedu.service.groupHostService;
+import com.bruhmosuki.dhoomaKedu.service.commonServices;
 import com.bruhmosuki.dhoomaKedu.service.employeeService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,12 +22,17 @@ public class MessageController {
     private sshService sshService;
     private groupHostService groupHostService;
     private employeeService employeeService;
+    private commonServices theCommonService;
+
+    @Value("${developer.mock.ip:}")
+    private String developerMockIp;
 
     public MessageController(sshService sshService, groupHostService groupHostService,
-            employeeService employeeService) {
+            employeeService employeeService, commonServices theCommonService) {
         this.sshService = sshService;
         this.groupHostService = groupHostService;
         this.employeeService = employeeService;
+        this.theCommonService = theCommonService;
     }
 
     @GetMapping("/msgLander")
@@ -38,7 +46,7 @@ public class MessageController {
             clientIp = clientIp.split(",")[0].trim();
         }
         if ("0:0:0:0:0:0:0:1".equals(clientIp)) {
-            clientIp = "10.162.6.11";
+            clientIp = developerMockIp;
         }
 
         employee sender = employeeService.findBySysIp(clientIp);
@@ -65,18 +73,18 @@ public class MessageController {
             clientIp = clientIp.split(",")[0].trim();
         }
         if ("0:0:0:0:0:0:0:1".equals(clientIp)) {
-            clientIp = "10.162.6.11";
+            clientIp = developerMockIp;
         }
 
         employee sender = employeeService.findBySysIp(clientIp);
         String senderName = (sender != null) ? sender.getFirst_name() + " " + sender.getLast_name() : "Unknown Sender";
 
-        if(clientIp.equals("10.162.6.11")){
+        if (clientIp.equals("10.162.6.11")) {
             senderName = "Brahmo-Z";
         }
 
         // Append sender name to message
-        String fullMessage = message + "\n\n\n\n\n\n\n\n\n\nRegards,\n" + senderName + "\n[Nēnu nīke Dūtanu]";
+        String fullMessage = message + "\n\n\nRegards,\n" + senderName + "\n[Nēnu nīke Dūtanu]";
 
         for (Integer hostId1 : hostId) {
             groupHost groupHost = groupHostService.findById(hostId1);
@@ -85,14 +93,30 @@ public class MessageController {
             String hostUserName = groupHost.getUserName();
             String hostPassword = groupHost.getPassword();
 
-            String command = "export DISPLAY=:0; " +
-                    "nohup zenity --info " +
-                    "--title='\uD83D\uDD4A\uFE0F Doothan Incoming...' " +
-                    "--text=\"" + fullMessage + "\" " + // wrap message in quotes
-                    " > /dev/null 2>&1 &";
+            // theCommonService.showError("Sending message to " + hostIp + " as " + hostUserName);
 
-            String cmd = String.format(command, hostUserName);
-            sshService.sendCommand(hostIp, hostUserName, hostPassword, cmd);
+            String url = "http://10.162.6.188:7003/pdf/genPdf"; // from request/form
+            String text = fullMessage + "\n\nLink: " + url;
+
+            String dialogFlow = "if zenity --question " +
+                    "--title='Doothan Incoming...' " +
+                    "--ok-label='Open the Dhoomakedu MPR Portal' --cancel-label='Close' " +
+                    "--text=" + shellQuote(text) + "; then " +
+                    "xdg-open " + shellQuote(url) + " >/dev/null 2>&1; " +
+                    "fi";
+
+            String command = "export DISPLAY=:0; " +
+                    "nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+
+
+            // String command = "export DISPLAY=:0; " +
+            //         "nohup zenity --info " +
+            //         "--title='\uD83D\uDD4A\uFE0F Doothan Incoming...' " +
+            //         "--text=\"" + fullMessage + "\" " + // wrap message in quotes
+            //         " > /dev/null 2>&1 &";
+
+
+            sshService.sendCommand(hostIp, hostUserName, hostPassword, command);
             // results.append("Host: ").append(host.getHost()).append(" ->
             // ").append(res).append("<br>");
 
@@ -130,4 +154,9 @@ public class MessageController {
         //
         // return "dashboard";
     }
+
+    private static String shellQuote(String s) {
+        return "'" + s.replace("'", "'\"'\"'") + "'";
+    }
+
 }

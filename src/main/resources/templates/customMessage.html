@@ -1,0 +1,238 @@
+<html layout:decorate="~{base}">
+
+<div layout:fragment="content">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;700&display=swap');
+
+        :root {
+            --paper: #f6efe3;
+            --ink: #1f2937;
+            --accent: #d90429;
+            --accent-soft: #f9d9df;
+            --stamp: #0b8f77;
+            --line: #d6c6ad;
+        }
+
+        .notice-shell {
+            min-height: 78vh;
+            display: grid;
+            place-items: center;
+            padding: 2rem 1.25rem;
+            background:
+                radial-gradient(circle at 85% 15%, #fcd5ce 0, transparent 36%),
+                radial-gradient(circle at 8% 90%, #d8f3dc 0, transparent 38%),
+                linear-gradient(145deg, #f5efe6, #efe4d4 58%, #f8f4ec);
+        }
+
+        .notice-card {
+            width: min(900px, 100%);
+            background: var(--paper);
+            border: 2px solid var(--ink);
+            border-radius: 18px;
+            box-shadow: 0 18px 48px rgba(17, 24, 39, 0.22);
+            overflow: hidden;
+            transform: rotate(-0.6deg);
+            animation: popIn 520ms ease-out;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) rotate(-1.2deg);
+            }
+
+            to {
+                opacity: 1;
+                transform: rotate(-0.6deg);
+            }
+        }
+
+        .notice-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-bottom: 2px dashed var(--line);
+            background: linear-gradient(90deg, rgba(217, 4, 41, 0.08), rgba(217, 4, 41, 0));
+        }
+
+        .ticket-label {
+            font: 700 0.8rem/1.2 "Manrope", sans-serif;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #6b7280;
+        }
+
+        .ticket-meta {
+            font: 700 0.84rem/1 "Manrope", sans-serif;
+            color: #334155;
+        }
+
+        .notice-body {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 1.3rem;
+            padding: 1.4rem;
+        }
+
+        .badge-wrap {
+            border: 2px dashed var(--line);
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background:
+                linear-gradient(160deg, #fff7eb, #f7f0e4),
+                repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.018) 0 4px, transparent 4px 8px);
+            position: relative;
+        }
+
+        .stamp {
+            width: 112px;
+            height: 112px;
+            border: 4px solid var(--stamp);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            color: var(--stamp);
+            font: 700 2rem/1 "Bebas Neue", sans-serif;
+            transform: rotate(-11deg);
+            letter-spacing: 0.02em;
+        }
+
+        .content h2 {
+            margin: 0;
+            color: var(--ink);
+            font: 400 2.5rem/0.95 "Bebas Neue", sans-serif;
+            letter-spacing: 0.03em;
+        }
+
+        .ribbon {
+            margin-top: 0.5rem;
+            display: inline-block;
+            padding: 0.35rem 0.62rem;
+            border: 1.6px solid var(--accent);
+            background: var(--accent-soft);
+            color: #7f1d1d;
+            font: 700 0.8rem/1 "Manrope", sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-radius: 999px;
+        }
+
+        .content p {
+            margin: 1rem 0 0;
+            color: #2f3a4a;
+            font: 500 1rem/1.7 "Manrope", sans-serif;
+            max-width: 60ch;
+        }
+
+        .actions {
+            margin-top: 1.2rem;
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.65rem 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font: 700 0.88rem/1 "Manrope", sans-serif;
+            border: 2px solid transparent;
+            transition: transform 160ms ease, box-shadow 160ms ease;
+        }
+
+        .btn-primary {
+            background: var(--ink);
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(17, 24, 39, 0.22);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border-color: #c8b79c;
+            color: #374151;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .ref {
+            margin-top: 0.75rem;
+            font: 600 0.78rem/1.4 "Manrope", sans-serif;
+            color: #6b7280;
+        }
+
+        .footer-bar {
+            border-top: 2px dashed var(--line);
+            padding: 0.75rem 1.25rem;
+            background: rgba(255, 255, 255, 0.45);
+            font: 700 0.72rem/1.2 "Manrope", sans-serif;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 760px) {
+            .notice-card {
+                transform: none;
+            }
+
+            .notice-body {
+                grid-template-columns: 1fr;
+            }
+
+            .badge-wrap {
+                min-height: 120px;
+            }
+
+            .content h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+
+    <section class="notice-shell">
+        <article class="notice-card" th:attr="data-level=${level}">
+            <header class="notice-header">
+                <div class="ticket-label">System Dispatch</div>
+                <div class="ticket-meta" th:text="${meta != null ? meta : 'Notification'}">Notification</div>
+            </header>
+
+            <div class="notice-body">
+                <aside class="badge-wrap">
+                    <div class="stamp">
+                        <span th:if="${level} == 'success'">OK</span>
+                        <span th:if="${level} == 'error'">ERR</span>
+                        <span th:if="${level} == 'warn'">WARN</span>
+                        <span th:if="${level} == 'info'">INFO</span>
+                        <span th:if="${level} == null">INFO</span>
+                    </div>
+                </aside>
+
+                <div class="content">
+                    <h2 th:text="${title != null ? title : 'Heads Up'}">Heads Up</h2>
+                    <span class="ribbon">Action Required</span>
+                    <p th:utext="${message != null ? message : 'No details provided.'}">No details provided.</p>
+
+                    <div class="actions">
+                        <a th:if="${actionUrl != null}" th:href="${actionUrl}" class="btn btn-primary"
+                            th:text="${actionText != null ? actionText : 'Continue'}">Continue</a>
+                        <a th:href="@{/}" class="btn btn-secondary">Go to Dashboard</a>
+                    </div>
+
+                    <div class="ref" th:if="${reference != null}">Reference: <span th:text="${reference}">REF-000</span></div>
+                </div>
+            </div>
+
+            <footer class="footer-bar">DhoomaKedu Internal Communication</footer>
+        </article>
+    </section>
+</div>
+
+</html>
