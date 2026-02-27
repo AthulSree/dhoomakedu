@@ -244,45 +244,62 @@ body {
   }
 }
 
-/* Comets (shooting stars) */
+/* Comets (Shooting Stars) - Enhanced for Realism */
 .comet {
   position: absolute;
-  width: 4px;
-  height: 4px;
-  background: #fff;
-  border-radius: 50%;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1), 0 0 0 8px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 0.1);
+  width: 150px;
+  /* Represents the tail length */
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 2px;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
   transform: rotate(315deg) translateX(0);
-  animation: animateComet 1s linear infinite;
+  animation: animateComet 6s linear infinite;
   z-index: 4;
 }
 
 .comet::before {
   content: '';
   position: absolute;
+  left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 300px;
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow:
+    0 0 10px 2px #fff,
+    0 0 20px 4px rgba(135, 206, 235, 0.6);
+  /* Blueish ion glow */
+}
+
+/* Add a second tail layer for "ion tail" effect on some comets */
+.comet::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100px;
   height: 1px;
-  background: linear-gradient(90deg, #fff, transparent);
+  background: linear-gradient(90deg, rgba(135, 206, 235, 0.5), transparent);
+  filter: blur(1px);
 }
 
 @keyframes animateComet {
   0% {
-    transform: rotate(315deg) translateX(0);
+    transform: rotate(315deg) translateX(200px) scale(0);
     opacity: 0;
   }
 
-  5% {
+  10% {
     opacity: 1;
-  }
-
-  70% {
-    opacity: 1;
+    transform: rotate(315deg) translateX(100px) scale(1);
   }
 
   100% {
-    transform: rotate(315deg) translateX(-1000px);
+    transform: rotate(315deg) translateX(-1200px) scale(1.2);
     opacity: 0;
   }
 }
@@ -291,56 +308,56 @@ body {
   top: 0;
   right: 0;
   animation-delay: 0s;
-  animation-duration: 1s;
+  animation-duration: 3s;
 }
 
 .comet:nth-child(10) {
   top: 0;
   right: 80px;
   animation-delay: 0s;
-  animation-duration: 3s;
+  animation-duration: 9s;
 }
 
 .comet:nth-child(11) {
   top: 80px;
   right: 0;
   animation-delay: 0s;
-  animation-duration: 2s;
+  animation-duration: 8s;
 }
 
 .comet:nth-child(12) {
   top: 0;
   right: 180px;
   animation-delay: 0s;
-  animation-duration: 1.5s;
+  animation-duration: 5s;
 }
 
 .comet:nth-child(13) {
   top: 0;
   right: 400px;
   animation-delay: 0s;
-  animation-duration: 2.5s;
+  animation-duration: 10s;
 }
 
 .comet:nth-child(14) {
   top: 100px;
   right: 50px;
   animation-delay: 0s;
-  animation-duration: 2s;
+  animation-duration: 7s;
 }
 
 .comet:nth-child(15) {
   top: 50px;
   right: 300px;
   animation-delay: 0s;
-  animation-duration: 1.8s;
+  animation-duration: 5s;
 }
 
 .comet:nth-child(16) {
   top: 200px;
   right: 100px;
   animation-delay: 0s;
-  animation-duration: 2.2s;
+  animation-duration: 6.5s;
 }
 
 /* Meteors (brighter, larger, with fiery tails) */
@@ -402,14 +419,16 @@ body {
   animation-duration: 2.5s;
 }
 
-/* Alien UFOs */
+/* Alien UFOs - High Tech Saucer */
 .ufo {
   position: absolute;
-  width: 20px;
-  height: 10px;
-  background: #ccc;
-  border-radius: 15px / 7.5px;
-  border: 1px solid #999;
+  width: 35px;
+  height: 12px;
+  background: linear-gradient(to bottom, #95a5a6, #2c3e50);
+  border-radius: 50%;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.6),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
   animation: animateUFO 10s ease-in-out infinite;
   z-index: 5;
 }
@@ -417,29 +436,71 @@ body {
 .ufo::before {
   content: '';
   position: absolute;
-  top: -5px;
+  top: -7px;
   left: 50%;
   transform: translateX(-50%);
-  width: 10px;
-  height: 5px;
-  background: #ccc;
-  border-radius: 50%;
+  width: 18px;
+  height: 12px;
+  background: radial-gradient(circle at 50% 100%, rgba(0, 255, 255, 0.3), rgba(0, 150, 255, 0.05));
+  border-radius: 50% 50% 10% 10%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(1px);
+}
+
+/* Pulsing LED Rim Lights */
+.ufo::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80%;
+  height: 2px;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  box-shadow:
+    -12px 0 4px -1px #00f260,
+    -4px 0 4px -1px #0575e6,
+    4px 0 4px -1px #f1c40f,
+    12px 0 4px -1px #e74c3c;
+  animation: ufoLights 1s steps(4) infinite;
+}
+
+@keyframes ufoLights {
+  0% {
+    opacity: 0.4;
+    filter: brightness(1);
+  }
+
+  50% {
+    opacity: 1;
+    filter: brightness(1.5) drop-shadow(0 0 2px currentColor);
+  }
+
+  100% {
+    opacity: 0.4;
+    filter: brightness(1);
+  }
 }
 
 @keyframes animateUFO {
   0% {
-    transform: translate(0, 0);
-    opacity: 0.7;
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(120px, -30px) rotate(2deg);
   }
 
   50% {
-    transform: translate(100px, 50px);
-    opacity: 1;
+    transform: translate(250px, 40px) rotate(-2deg);
+  }
+
+  75% {
+    transform: translate(100px, 80px) rotate(1deg);
   }
 
   100% {
-    transform: translate(0, 0);
-    opacity: 0.7;
+    transform: translate(0, 0) rotate(0deg);
   }
 }
 
@@ -517,76 +578,103 @@ body {
   animation-delay: 5s;
 }
 
-/* Full Moon with Crater Texture */
+/* High-Detail Full Moon */
 .moon {
   position: absolute;
-  width: 60px;
-  height: 60px;
-  background: radial-gradient(circle, #d3d3d3 70%, #b0b0b0 100%);
+  top: 50px;
+  left: 50px;
+  width: 85px;
+  height: 85px;
+  background: radial-gradient(circle at 35% 35%, #fff 0%, #d3d3d3 45%, #888 100%);
   border-radius: 50%;
   box-shadow:
-    0 0 20px rgba(211, 211, 211, 0.4),
-    0 0 50px rgba(107, 114, 128, 0.3),
-    inset -5px -5px 10px rgba(0, 0, 0, 0.2),
-    inset 5px 5px 10px rgba(255, 255, 255, 0.3);
-  animation: wanderMoon 30s ease-in-out infinite;
+    0 0 40px rgba(255, 255, 255, 0.1),
+    inset -12px -12px 25px rgba(0, 0, 0, 0.5),
+    inset 8px 8px 15px rgba(255, 255, 255, 0.2);
+  animation: wanderMoon 120s ease-in-out infinite;
   z-index: 6;
 }
 
+/* Crater Texture Overlay */
 .moon::before {
   content: '';
   position: absolute;
-  width: 10px;
-  height: 10px;
-  background: rgba(0, 0, 0, 0.2);
+  inset: 0;
   border-radius: 50%;
-  top: 20px;
-  left: 15px;
-  box-shadow:
-    20px 10px 0 -2px rgba(0, 0, 0, 0.2),
-    10px 30px 0 -3px rgba(0, 0, 0, 0.2),
-    30px 25px 0 -4px rgba(0, 0, 0, 0.2);
+  opacity: 0.25;
+  background-image:
+    radial-gradient(circle at 20% 40%, #000 1%, transparent 7%),
+    radial-gradient(circle at 50% 20%, #000 2%, transparent 10%),
+    radial-gradient(circle at 70% 60%, #000 3%, transparent 12%),
+    radial-gradient(circle at 30% 80%, #000 2%, transparent 9%),
+    radial-gradient(circle at 15% 15%, #000 1%, transparent 6%),
+    radial-gradient(circle at 85% 85%, #000 2%, transparent 8%),
+    radial-gradient(circle at 60% 45%, #000 4%, transparent 15%);
+  filter: blur(1px);
+  animation: spinCraters 300s linear infinite;
+}
+
+@keyframes spinCraters {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Atmospheric Bloom */
+.moon::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 @keyframes wanderMoon {
   0% {
-    transform: translate(0, 0);
+    transform: translate(0, 0) rotate(0deg);
   }
 
-  20% {
-    transform: translate(150px, 50px);
+  25% {
+    transform: translate(150px, 50px) rotate(45deg);
   }
 
-  40% {
-    transform: translate(250px, -30px);
+  50% {
+    transform: translate(250px, -30px) rotate(90deg);
   }
 
-  60% {
-    transform: translate(200px, -80px);
-  }
-
-  80% {
-    transform: translate(100px, -20px);
+  75% {
+    transform: translate(100px, -20px) rotate(135deg);
   }
 
   100% {
-    transform: translate(0, 0);
+    transform: translate(0, 0) rotate(180deg);
   }
-}
-
-.moon {
-  top: 50px;
-  left: 50px;
 }
 
 /* Rocket */
 .rocket {
   position: absolute;
-  width: 20px;
-  height: 30px;
-  background: #ccc;
-  border-radius: 10px 10px 0 0;
-  border: 1px solid #999;
+  width: 22px;
+  height: 48px;
+  background:
+    radial-gradient(circle at 50% 30%, #fff 2px, #3498db 3px, #2980b9 5px, transparent 6px),
+    /* Porthole window */
+    linear-gradient(90deg, #95a5a6 0%, #ecf0f1 50%, #95a5a6 100%);
+  /* Metallic body contour */
+  border-radius: 50% 50% 10% 10% / 100% 100% 10% 10%;
+  box-shadow:
+    inset -2px 0 5px rgba(0, 0, 0, 0.15),
+    -8px 32px 0 -4px #e74c3c,
+    /* Left wing fin */
+    8px 32px 0 -4px #e74c3c,
+    /* Right wing fin */
+    0 35px 0 -5px #c0392b;
+  /* Center engine shroud */
   animation: animateRocket 10s linear infinite;
   z-index: 7;
 }
@@ -594,19 +682,22 @@ body {
 .rocket::before {
   content: '';
   position: absolute;
-  bottom: -10px;
+  bottom: -18px;
   left: 50%;
   transform: translateX(-50%);
-  width: 10px;
-  height: 10px;
-  background: #ffcc00;
+  width: 14px;
+  height: 28px;
+  background: radial-gradient(ellipse at top, #fff, #f1c40f 20%, #e67e22 50%, transparent 80%);
   border-radius: 50%;
+  filter: blur(1.5px);
+  animation: rocketFlame 0.1s infinite alternate;
 }
 
 .rocket::after {
   content: 'Dhoomachaale';
   position: absolute;
-  bottom: -40px;
+  bottom: -55px;
+  /* Adjusted for longer rocket and flame */
   left: 50%;
   transform: translateX(-50%);
   font-family: 'Orbitron', sans-serif;
@@ -617,6 +708,20 @@ body {
   white-space: nowrap;
   opacity: 0.8;
   animation: fadeSmoke 15s linear infinite;
+}
+
+@keyframes rocketFlame {
+  0% {
+    height: 25px;
+    opacity: 0.8;
+    transform: translateX(-50%) scaleX(0.9);
+  }
+
+  100% {
+    height: 35px;
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1.1);
+  }
 }
 
 @keyframes animateRocket {
