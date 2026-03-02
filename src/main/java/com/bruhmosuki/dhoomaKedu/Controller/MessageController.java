@@ -95,12 +95,12 @@ public class MessageController {
 
             // theCommonService.showError("Sending message to " + hostIp + " as " + hostUserName);
 
-            String url = "http://10.162.6.188:7003/pdf/genPdf"; // from request/form
+            String url = "http://10.162.6.180:8015/docsquad/"; // from request/form
             String text = fullMessage + "\n\nLink: " + url;
 
             String dialogFlow = "if zenity --question " +
                     "--title='Doothan Incoming...' " +
-                    "--ok-label='Open the Dhoomakedu MPR Portal' --cancel-label='Close' " +
+                    "--ok-label='Open the byte-WhaSSH 2.0 / DocsQuad' --cancel-label='Close' " +
                     "--text=" + shellQuote(text) + "; then " +
                     "xdg-open " + shellQuote(url) + " >/dev/null 2>&1; " +
                     "fi";
