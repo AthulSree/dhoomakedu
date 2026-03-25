@@ -5,7 +5,6 @@ import com.bruhmosuki.dhoomaKedu.entity.leaves;
 import org.springframework.stereotype.Service;
 import com.bruhmosuki.dhoomaKedu.entity.employee;
 
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,8 +65,7 @@ public class leavesService {
         return leavesRepository.findByEmpIdAndLeaveMpYear(theEmployeeData, year);
     }
 
-    public float findTotalComboLeavesTakenThisYear(employee theEmployeeData) {
-        int year = Calendar.getInstance().get(Calendar.YEAR);
+    public float findTotalComboLeavesTakenThisYear(employee theEmployeeData, int month, int year) {
         System.out.println(">>>>>>>>>>>" + year + "<<<<<<<<<<<<<<");
         List<leaves> result = leavesRepository.findByEmpIdAndLeaveMpYear(theEmployeeData, year);
 
@@ -78,7 +76,9 @@ public class leavesService {
         float totalComboLeavesUsed = 0;
         for (leaves leave : result) {
             System.out.println(">>>>>>>>>>>////////////////////"+leave.getUsedComboLeaves()+"///////////////////////////<<<<<<<<<<<<<<");
-            totalComboLeavesUsed += leave.getUsedComboLeaves();
+            if (leave.getLeaveMpMonth() < month) {
+                totalComboLeavesUsed += leave.getUsedComboLeaves();
+            }
         }
 
         return totalComboLeavesUsed;

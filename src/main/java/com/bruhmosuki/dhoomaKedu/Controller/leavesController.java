@@ -107,21 +107,23 @@ public class leavesController {
         theSavedLeave.setAtSideB(theLeaveDto.getAtSideB().getBytes());
 
         // Combo Leaves Logic
-        float totalLeaves = 0;
-        if (theLeaveDto.getLeaveStr() != null && !theLeaveDto.getLeaveStr().trim().isEmpty()) {
-            totalLeaves = theLeaveDto.getLeaveStr().split(",").length;
-        }
-        totalLeaves += theLeaveDto.getHalfDayLeaveCnt() * 0.5f;
+        // float totalLeaves = 0;
+        // if (theLeaveDto.getLeaveStr() != null &&
+        // !theLeaveDto.getLeaveStr().trim().isEmpty()) {
+        // totalLeaves = theLeaveDto.getLeaveStr().split(",").length;
+        // }
+        // totalLeaves += theLeaveDto.getHalfDayLeaveCnt() * 0.5f;
 
-        float newComboUsed = Math.max(0, totalLeaves - 1);
+        // float newComboUsed = Math.max(0, totalLeaves - 1);
 
-        // Update workorder balance
-        employee emp = theEmployeeService.findById(theLeaveDto.getEmpId().getId().intValue());
-        workorder wo = theWorkorderService.findByEmpId(emp);
+        // // Update workorder balance
+        // employee emp =
+        // theEmployeeService.findById(theLeaveDto.getEmpId().getId().intValue());
+        // workorder wo = theWorkorderService.findByEmpId(emp);
 
-        float delta = newComboUsed - theSavedLeave.getUsedComboLeaves();
-        wo.setComboLeaves(wo.getComboLeaves() - delta);
-        theWorkorderService.save(wo);
+        // float delta = newComboUsed - theSavedLeave.getUsedComboLeaves();
+        // wo.setComboLeaves(wo.getComboLeaves() - delta);
+        // theWorkorderService.save(wo);
 
         // theSavedLeave.setUsedComboLeaves(newComboUsed);
 
@@ -149,12 +151,14 @@ public class leavesController {
     @GetMapping("/fileGenz")
     public ResponseEntity<byte[]> getFile(@RequestParam("empId") int empId,
             @RequestParam("atSide") String atSide) {
+
         employee theEmployeeData = theEmployeeService.findById(empId);
         monthPeriod theMonthPeriod = theMonthPeriodService.findAll().get(0);
         leaves theLeave = theLeaveService.findByEmpIdAndLeaveMpMonthAndLeaveMpYear(
                 theEmployeeData, theMonthPeriod.getMonth(), theMonthPeriod.getYear());
-        float totalComboLeavesTaken = theLeaveService.findTotalComboLeavesTakenThisYear(theEmployeeData);
-        
+        float totalComboLeavesTaken = theLeaveService.findTotalComboLeavesTakenThisYear(theEmployeeData, theMonthPeriod.getMonth(), theMonthPeriod.getYear());
+
+        System.out.println(">>>>>>>>>>>>>>" + totalComboLeavesTaken);
 
         byte[] atFile = null;
         String sideLabel = "";
@@ -181,12 +185,11 @@ public class leavesController {
         }
         totalLeavesActual += theLeave.getHalfDayLeaveCnt() * 0.5f;
 
-
         // Combo Leaves Logic for PDF
         workorder wo = theWorkorderService.findByEmpId(theEmployeeData);
         float comboUsedThisMonth = theLeave.getUsedComboLeaves(); // 1
-        float comboRemaining = wo.getComboLeaves() - totalComboLeavesTaken; // 11
-        float comboAvailable = wo.getComboLeaves() - (totalComboLeavesTaken - comboUsedThisMonth); // 12
+        float comboRemaining = wo.getComboLeaves() - (totalComboLeavesTaken + comboUsedThisMonth); // 11
+        float comboAvailable = wo.getComboLeaves() - totalComboLeavesTaken; // 12
 
         DecimalFormat df = new DecimalFormat("0.#");
         String footerText = "";
