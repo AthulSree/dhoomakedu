@@ -62,6 +62,7 @@ public class MessageController {
     @PostMapping("/sendMsg")
     public String sendMsg(@RequestParam("hostId") List<Integer> hostId,
             @RequestParam("msgContainer") String message,
+            @RequestParam(value = "msgType", defaultValue = "normal") String msgType,
             HttpServletRequest request) {
 
         String clientIp = request.getHeader("X-Forwarded-For");
@@ -95,26 +96,42 @@ public class MessageController {
 
             // theCommonService.showError("Sending message to " + hostIp + " as " + hostUserName);
 
-            String url = "http://10.162.6.180:8015/docsquad/"; // from request/form
-            String text = fullMessage + "\n\nLink: " + url;
+            String command = "";
+            
+            if ("docsquad".equals(msgType)) {
+                //------ Docsquad message ------ 
+                String url = "http://10.162.6.180:8015/docsquad/"; // from request/form
+                String text = fullMessage + "\n\nLink: " + url;
+                String dialogFlow = "if zenity --question " +
+                        "--title='Doothan Incoming...' " +
+                        "--ok-label='Open the byte-WhaSSH 2.0 / DocsQuad' --cancel-label='Close' " +
+                        "--text=" + shellQuote(text) + "; then " +
+                        "xdg-open " + shellQuote(url) + " >/dev/null 2>&1; " +
+                        "fi";
 
-            String dialogFlow = "if zenity --question " +
-                    "--title='Doothan Incoming...' " +
-                    "--ok-label='Open the byte-WhaSSH 2.0 / DocsQuad' --cancel-label='Close' " +
-                    "--text=" + shellQuote(text) + "; then " +
-                    "xdg-open " + shellQuote(url) + " >/dev/null 2>&1; " +
-                    "fi";
+                command = "export DISPLAY=:0; " +
+                        "nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+            } else if ("leave".equals(msgType)) {
+                //------ Add Leave message ------ 
+                String url = "http://10.162.6.188:7003/leaves/manage"; // from request/form
+                String text = fullMessage + "\n\nLink: " + url;
+                String dialogFlow = "if zenity --question " +
+                        "--title='Doothan Incoming...' " +
+                        "--ok-label='Open Leave Portal' --cancel-label='Close' " +
+                        "--text=" + shellQuote(text) + "; then " +
+                        "xdg-open " + shellQuote(url) + " >/dev/null 2>&1; " +
+                        "fi";
 
-            String command = "export DISPLAY=:0; " +
-                    "nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
-
-
-            // String command = "export DISPLAY=:0; " +
-            //         "nohup zenity --info " +
-            //         "--title='\uD83D\uDD4A\uFE0F Doothan Incoming...' " +
-            //         "--text=\"" + fullMessage + "\" " + // wrap message in quotes
-            //         " > /dev/null 2>&1 &";
-
+                command = "export DISPLAY=:0; " +
+                        "nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+            } else {
+                //------ Normal message ------ 
+                command = "export DISPLAY=:0; " +
+                        "nohup zenity --info " +
+                        "--title='\uD83D\uDD4A\uFE0F Doothan Incoming...' " +
+                        "--text=\"" + fullMessage + "\" " + // wrap message in quotes
+                        " > /dev/null 2>&1 &";
+            }
 
             sshService.sendCommand(hostIp, hostUserName, hostPassword, command);
             // results.append("Host: ").append(host.getHost()).append(" ->

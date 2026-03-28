@@ -251,6 +251,13 @@
             <div class="form-grid">
                 <!-- Left Column: Message -->
                 <div class="cosmic-input-wrapper">
+                    <label class="form-section-title">Message Type</label>
+                    <select class="form-select cosmic-textarea" name="msgType" style="min-height: auto; padding: 12px; height: 50px; margin-bottom: 1.5rem;" required>
+                        <option value="normal">Normal Message</option>
+                        <option value="docsquad">DocSquad Message</option>
+                        <option value="leave">Leave Portal Message</option>
+                    </select>
+
                     <label class="form-section-title">Cosmic Transmission</label>
                     <textarea class="cosmic-textarea" id="msgContainer" name="msgContainer"
                         placeholder="Type your celestial message here..." required maxlength="500"></textarea>

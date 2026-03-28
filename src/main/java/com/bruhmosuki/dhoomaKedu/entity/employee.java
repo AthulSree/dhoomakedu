@@ -1,6 +1,5 @@
 package com.bruhmosuki.dhoomaKedu.entity;
 
-
 import jakarta.persistence.*;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -36,7 +35,8 @@ public class employee {
     public employee() {
     }
 
-    public employee(Long id, String first_name, String last_name, String as_group, String sys_ip, Boolean is_admin, LocalDateTime updated_time) {
+    public employee(Long id, String first_name, String last_name, String as_group, String sys_ip, Boolean is_admin,
+            LocalDateTime updated_time) {
         this.id = id;
         this.first_name = first_name;
         this.last_name = last_name;

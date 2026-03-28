@@ -84,4 +84,23 @@ public class leavesService {
         return totalComboLeavesUsed;
     }
 
+    public float findTotalComboLeavesTakenThisYearTillGivenMonth(employee theEmployeeData, int month, int year) {
+        System.out.println(">>>>>>>>>>>" + year + "<<<<<<<<<<<<<<");
+        List<leaves> result = leavesRepository.findByEmpIdAndLeaveMpYear(theEmployeeData, year);
+
+        if (result == null) {
+            throw new RuntimeException("No leave list available for the id" + theEmployeeData.getId());
+        }
+        
+        float totalComboLeavesUsed = 0;
+        for (leaves leave : result) {
+            System.out.println(">>>>>>>>>>>////////////////////"+leave.getUsedComboLeaves()+"///////////////////////////<<<<<<<<<<<<<<");
+            if (leave.getLeaveMpMonth() <= month) {
+                totalComboLeavesUsed += leave.getUsedComboLeaves();
+            }
+        }
+
+        return totalComboLeavesUsed;
+    }
+
 }

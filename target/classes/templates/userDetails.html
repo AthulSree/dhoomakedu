@@ -445,8 +445,10 @@
                 </div>
 
                 <div class="info-group">
-                    <span class="i-label">Floating Credits (Combo)</span>
-                    <span class="i-value value-hl" th:text="${emp_wo.comboLeaves}">14.0</span>
+                    <span class="i-label">Floating Credits (Combo Pend)</span>
+                    <span class="i-value value-hl">
+                        <span style="color: #2ecc71;" th:text="${combo_pending}"></span> / <span th:text="${emp_wo.comboLeaves}">14.0</span>
+                    </span>
                 </div>
 
                 <div class="info-group">
