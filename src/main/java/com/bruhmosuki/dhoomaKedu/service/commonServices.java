@@ -45,6 +45,24 @@ public class commonServices {
         return lastThreeMonths;
     }
 
+    public List<Map<String, String>> fetchLastSixMonths() {
+        YearMonth current = YearMonth.now();
+        DateTimeFormatter labelFmt = DateTimeFormatter.ofPattern("MMMM yyyy");
+
+        List<Map<String, String>> lastSixMonths = new ArrayList<>();
+
+        for (int i = 0; i < 6; i++) {
+            YearMonth ym = current.minusMonths(i);
+
+            Map<String, String> monthData = new HashMap<>();
+            monthData.put("value", ym.getMonthValue() + "*" + ym.getYear());
+            monthData.put("label", ym.format(labelFmt));
+
+            lastSixMonths.add(monthData);
+        }
+        return lastSixMonths;
+    }
+
     public String getUserIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
