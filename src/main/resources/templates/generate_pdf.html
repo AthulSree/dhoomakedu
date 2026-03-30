@@ -294,6 +294,15 @@
             filter: brightness(1.1);
         }
 
+        .modern-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(0.8);
+            pointer-events: none;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
         .btn-att:hover {
             background: rgba(255, 255, 255, 0.12);
             color: #fff;
@@ -320,21 +329,23 @@
         </div>
 
         <div class="card-grid">
-            <div th:each="emp : ${empMprData}" class="frost-card"
+            <div th:each="emp : ${empMprData}" 
+                th:with="isExpired=${emp.woToDate != null and emp.woToDate lt #dates.createToday()}"
+                class="frost-card"
                 th:classappend="${emp.leaveList == null} ? ' no-leave' : ' has-leave'">
 
                 <div class="leave-status"></div>
 
                 <!-- WO Expired Warning -->
                 <div class="wo-warning expired"
-                    th:if="${emp.woToDate != null and emp.woToDate lt #dates.createToday()}"
+                    th:if="${isExpired}"
                     th:title="'Work Order expired on ' + ${#dates.format(emp.woToDate, 'dd MMM yyyy')}">
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
 
                 <!-- WO Expiry Warning (within 2 months) -->
                 <div class="wo-warning"
-                    th:if="${emp.woToDate != null and emp.woToDate ge #dates.createToday() and emp.woToDate le T(java.sql.Date).valueOf(T(java.time.LocalDate).now().plusMonths(2))}"
+                    th:if="${emp.woToDate != null and !isExpired and emp.woToDate le T(java.sql.Date).valueOf(T(java.time.LocalDate).now().plusMonths(2))}"
                     th:classappend="${#dates.format(emp.woToDate, 'yyyy-MM') == #dates.format(#dates.createToday(), 'yyyy-MM')} ? 'critical' : ''"
                     th:title="'Work Order expiring on ' + ${#dates.format(emp.woToDate, 'dd MMM yyyy')}">
                     <i class="fas fa-history"></i>
@@ -348,10 +359,12 @@
                 <div class="btn-stack">
                     <div class="btn-row">
                         <button class="modern-btn btn-mpr"
+                            th:disabled="${isExpired}"
                             th:onclick="|window.location='@{/pdf/genz(empId=${emp.empId})}'|">
                             <i class="fas fa-file-pdf"></i> MPR
                         </button>
                         <button class="modern-btn btn-lac" th:if="${emp.agency == 'AEOLOGIC'}"
+                            th:disabled="${isExpired}"
                             th:onclick="|window.location='@{/pdf/lacGenz(empId=${emp.empId})}'|">
                             <i class="fas fa-check-circle"></i> LAC
                         </button>
