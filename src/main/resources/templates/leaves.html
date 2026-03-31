@@ -715,38 +715,6 @@
     </div>
 
     <script th:src="@{/js/leaves.js}"></script>
-    <script>
-        function toggleModal() {
-            const modal = document.getElementById('instructionModal');
-            const notice = document.getElementById('helpNotice');
-            
-            // Hide notice permanently when modal is engaged
-            if (notice) notice.style.display = 'none';
-
-            if (modal.style.display === 'flex') {
-                modal.classList.remove('show');
-                setTimeout(() => modal.style.display = 'none', 300);
-            } else {
-                modal.style.display = 'flex';
-                setTimeout(() => modal.classList.add('show'), 10);
-            }
-        }
-
-        // Auto-hide notice after some time anyway
-        setTimeout(() => {
-            const notice = document.getElementById('helpNotice');
-            if (notice) notice.style.opacity = '0';
-            setTimeout(() => { if(notice) notice.style.display = 'none'; }, 500);
-        }, 8000);
-
-        // Close on clicking outside the content
-        window.onclick = function(event) {
-            const modal = document.getElementById('instructionModal');
-            if (event.target == modal) {
-                toggleModal();
-            }
-        }
-    </script>
 </div>
 
 </html>
