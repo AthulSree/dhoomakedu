@@ -103,7 +103,7 @@ public class SettingsController {
             String status;
             if      (daysLeft < 0)   status = "EXPIRED";
             else if (daysLeft <= 30) status = "CRITICAL";
-            else if (daysLeft <= 90) status = "WARNING";
+            else if (daysLeft <= 60) status = "WARNING";
             else                     status = "OK";
 
             Map<String, Object> alert = new LinkedHashMap<>();

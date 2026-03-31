@@ -470,7 +470,7 @@
                     <i class="fa-solid fa-fire"></i> Critical (≤30d): <strong th:text="${criticalCount}">0</strong>
                 </span>
                 <span class="alert-badge alert-badge-warn">
-                    <i class="fa-solid fa-clock"></i> Warning (≤90d): <strong th:text="${warningCount}">0</strong>
+                    <i class="fa-solid fa-clock"></i> Warning (≤60d): <strong th:text="${warningCount}">0</strong>
                 </span>
                 <span class="alert-badge alert-badge-ok">
                     <i class="fa-solid fa-shield-halved"></i> Healthy: <strong th:text="${woAlerts.size() - expiredCount - criticalCount - warningCount}">0</strong>

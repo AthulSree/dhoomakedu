@@ -267,6 +267,26 @@
             line-height: 1.4;
         }
 
+        /* --- WO Status Kicker --- */
+        .wo-status-kicker {
+            margin-top: 15px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.05rem;
+            animation: fadeIn 1.2s ease-out;
+        }
+        .status-healthy { color: #2ecc71; text-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
+        .status-warning { color: #ff9f43; text-shadow: 0 0 10px rgba(255, 159, 67, 0.3); }
+        .status-critical { color: #ff3b69; text-shadow: 0 0 10px rgba(255, 59, 105, 0.3); }
+        .status-expired { 
+            color: #ff3b69; 
+            text-shadow: 0 0 15px rgba(255, 59, 105, 0.5); 
+            background: rgba(255, 59, 105, 0.1);
+            padding: 4px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 59, 105, 0.3);
+        }
+
         .full-width {
             grid-column: span 2;
         }
@@ -367,6 +387,12 @@
     <header class="dossier-header">
         <p class="dossier-sub">Dossier Access // Authorized</p>
         <h1 class="dossier-title">PERSONNEL RECORD</h1>
+        <div th:if="${daysToExpiry != null}" class="wo-status-kicker">
+            <span th:if="${daysToExpiry > 60}" class="status-healthy">HealthyKuttaa</span>
+            <span th:if="${daysToExpiry >= 30 and daysToExpiry <= 60}" class="status-warning">Theerarayi kutta</span>
+            <span th:if="${daysToExpiry >= 1 and daysToExpiry < 30}" class="status-critical">Ariyikkanullavareyokke ariyichekk 😔</span>
+            <span th:if="${daysToExpiry <= 0}" class="status-expired">Ithum nokki irikkathe poi choikk 😠</span>
+        </div>
     </header>
 
     <main class="dossier-container">
