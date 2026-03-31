@@ -10,6 +10,7 @@
             --accent-blue: #60a5fa;
             --accent-green: #34d399;
             --accent-red: #ef4444;
+            --accent-purple: #a855f7;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --input-bg: rgba(255, 255, 255, 0.05);
@@ -92,6 +93,18 @@
         .form-side {
             flex: 0 0 380px;
             min-width: 320px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .form-side::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .form-side::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 10px;
         }
 
         .table-side {
@@ -329,6 +342,192 @@
         .action-link:hover {
             background: rgba(96, 165, 250, 0.2);
         }
+
+        /* Instruction Card */
+        .instruction-card {
+            margin-top: 1.5rem;
+            padding: 1.5rem !important;
+            background: rgba(59, 130, 246, 0.05) !important;
+            border: 1px solid rgba(59, 130, 246, 0.2) !important;
+        }
+
+        .instruction-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .instruction-item {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .instruction-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .instruction-item i {
+            color: var(--accent-blue);
+            margin-top: 0.25rem;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .instruction-item b {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        /* Modal Styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            max-width: 450px;
+            width: 90%;
+            position: relative;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin: 1rem;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .modal-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .help-trigger {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: var(--accent-blue);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .help-trigger:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .help-btn-mini {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .help-btn-mini:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            transform: scale(1.1);
+        }
+
+        /* Help Notice Bubble */
+        .help-notice {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: var(--accent-purple);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+            animation: noticeAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), noticeFloat 2s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 1;
+        }
+
+        .help-notice::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            right: 10px;
+            border-width: 0 6px 6px 6px;
+            border-style: solid;
+            border-color: transparent transparent var(--accent-purple) transparent;
+        }
+
+        @keyframes noticeAppear {
+            from { opacity: 0; transform: scale(0.5) translateY(-10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes noticeFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(4px); }
+        }
     </style>
 
     <div class="page-wrapper">
@@ -341,7 +540,13 @@
             <!-- Left Side: Form -->
             <aside class="form-side">
                 <div class="glass-card">
-                    <h2 class="card-title"><i class="fas fa-calendar-plus"></i> Log New Leave 🐐</h2>
+                    <h2 class="card-title" style="justify-content: space-between;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-calendar-plus"></i> Log New Leave 🐐</span>
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <div id="helpNotice" class="help-notice">How to use? ✨</div>
+                            <button type="button" class="help-btn-mini" onclick="toggleModal()" title="View Instructions"><i class="fas fa-question-circle"></i></button>
+                        </div>
+                    </h2>
                     <form th:action="@{/leaves/saveLeave}" th:object="${leaveObj}" method="POST"
                         enctype="multipart/form-data">
                         <input type="hidden" th:field="*{id}" />
@@ -363,7 +568,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Day/2 Count (Aaloichitt mathram)</label>
+                            <label class="form-label">Day/2 Count (Nannaayitt alochichitt mathram)</label>
                             <input class="glass-input" type="number" th:field="*{halfDayLeaveCnt}" step="0.5">
                         </div>
 
@@ -461,7 +666,87 @@
         <img th:src="@{/img/shammy1.png}" alt="character" class="dialogue-character">
     </div>
 
+    <!-- Instructions Modal -->
+    <div id="instructionModal" class="modal-overlay">
+        <div class="modal-content glass-card instruction-card">
+            <button class="modal-close" onclick="toggleModal()">&times;</button>
+            <h2 class="card-title" style="font-size: 1.25rem; margin-bottom: 1.5rem;">
+                <i class="fas fa-info-circle"></i> Leave Portal Guide
+            </h2>
+            <ul class="instruction-list">
+                <li class="instruction-item">
+                    <i class="fas fa-user-check"></i>
+                    <div>
+                        <b>1. Select Employee</b>
+                        Choose the correct personnel from the dropdown list.
+                    </div>
+                </li>
+                <li class="instruction-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div>
+                        <b>2. Absent Dates</b>
+                        Enter just the days (e.g. 2, 13) if 2nd and 13th was absent. Comma-separated values only. 
+                        <i>FYI: Focus on this field and click Enter/Tab/Space to see what Shammy says!</i>
+                    </div>
+                </li>
+                <li class="instruction-item">
+                    <i class="fas fa-hourglass-half"></i>
+                    <div>
+                        <b>3. Half-Day Leaves (Day/2)</b>
+                        Use this to mention half-day leaves. Should be entered only if strictly necessary (Nannaayitt alochichitt mathram).
+                    </div>
+                </li>
+                <li class="instruction-item">
+                    <i class="fas fa-plus-circle"></i>
+                    <div>
+                        <b>4. Used Combo Leaves</b>
+                        Enter the count here if combo leaves are used for this recording.
+                    </div>
+                </li>
+                <li class="instruction-item">
+                    <i class="fas fa-file-pdf"></i>
+                    <div>
+                        <b>5. Upload Attendance (Optional)</b>
+                        Uploading the PDF is optional. If uploaded, the system will automatically print available, used, and pending combo leaves on the document.
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
     <script th:src="@{/js/leaves.js}"></script>
+    <script>
+        function toggleModal() {
+            const modal = document.getElementById('instructionModal');
+            const notice = document.getElementById('helpNotice');
+            
+            // Hide notice permanently when modal is engaged
+            if (notice) notice.style.display = 'none';
+
+            if (modal.style.display === 'flex') {
+                modal.classList.remove('show');
+                setTimeout(() => modal.style.display = 'none', 300);
+            } else {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+            }
+        }
+
+        // Auto-hide notice after some time anyway
+        setTimeout(() => {
+            const notice = document.getElementById('helpNotice');
+            if (notice) notice.style.opacity = '0';
+            setTimeout(() => { if(notice) notice.style.display = 'none'; }, 500);
+        }, 8000);
+
+        // Close on clicking outside the content
+        window.onclick = function(event) {
+            const modal = document.getElementById('instructionModal');
+            if (event.target == modal) {
+                toggleModal();
+            }
+        }
+    </script>
 </div>
 
 </html>
