@@ -23,6 +23,8 @@ import java.util.List;
 @RequestMapping("/employee")
 public class employeeController {
 
+    private static final String ROLE_SWITCH_MACHINE_IP = "10.162.6.11";
+
     private final employeeService employeeService;
     private final commonServices theCommonServices;
     private workorderService theWorkorderService;
@@ -39,18 +41,20 @@ public class employeeController {
     }
 
     @GetMapping("/manage")
-    public String manage(Model model, HttpServletRequest request) {
+    public String manage(Model model, HttpServletRequest request,@RequestParam(value = "mode", required = false, defaultValue = "admin") String mode) {
         String userIp = theCommonServices.getUserIp(request);
         System.out.println("................." + userIp);
         employee loggedUser = employeeService.findBySysIp(userIp);
         workorder emp_wo = theWorkorderService.findByEmpId(loggedUser);
+        boolean canSwitchEmployeeMode = ROLE_SWITCH_MACHINE_IP.equals(userIp) && loggedUser.getIs_admin();
+        boolean individualMode = canSwitchEmployeeMode && "individual".equalsIgnoreCase(mode);
 
         // COmbo section -----
         monthPeriod theMonthPeriod = theMonthPeriodService.findAll().get(0);
         float totalComboLeavesTaken = theLeaveService.findTotalComboLeavesTakenThisYearTillGivenMonth(loggedUser, theMonthPeriod.getMonth(), theMonthPeriod.getYear());
         float comboPending = emp_wo.getComboLeaves() - totalComboLeavesTaken;
 
-        if (!loggedUser.getIs_admin()) {
+        if (!loggedUser.getIs_admin() || individualMode) {
             if (emp_wo != null && emp_wo.getWoToDate() != null) {
                 long daysToExpiry = ChronoUnit.DAYS.between(LocalDate.now(), emp_wo.getWoToDate());
                 model.addAttribute("daysToExpiry", daysToExpiry);
@@ -58,21 +62,29 @@ public class employeeController {
             model.addAttribute("loggedUser", loggedUser);
             model.addAttribute("emp_wo", emp_wo);
             model.addAttribute("combo_pending", comboPending);
+            model.addAttribute("canSwitchEmployeeMode", canSwitchEmployeeMode);
+            model.addAttribute("employeeViewMode", "individual");
             return "userDetails";
         }
         List<employee> employeeData = employeeService.findAll();
         employee theEmployee = new employee();
         model.addAttribute("employee", theEmployee);
         model.addAttribute("employeeData", employeeData);
+        model.addAttribute("canSwitchEmployeeMode", canSwitchEmployeeMode);
+        model.addAttribute("employeeViewMode", "admin");
         return "employee";
     }
 
     @GetMapping("/showFormForUpdate")
-    public String manageUpdate(@RequestParam("employeeId") int theId, Model model) {
+    public String manageUpdate(@RequestParam("employeeId") int theId, Model model, HttpServletRequest request) {
         List<employee> employeeData = employeeService.findAll();
         employee theEmployee = employeeService.findById(theId);
+        String userIp = theCommonServices.getUserIp(request);
+        employee loggedUser = employeeService.findBySysIp(userIp);
         model.addAttribute("employee", theEmployee);
         model.addAttribute("employeeData", employeeData);
+        model.addAttribute("canSwitchEmployeeMode", ROLE_SWITCH_MACHINE_IP.equals(userIp) && loggedUser.getIs_admin());
+        model.addAttribute("employeeViewMode", "admin");
         System.out.println(theId);
         return "employee";
     }

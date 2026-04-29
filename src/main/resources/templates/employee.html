@@ -42,6 +42,36 @@
             padding: 4px 10px;
         }
 
+        .employee-mode-switch {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .employee-mode-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #07111f;
+            background: linear-gradient(135deg, #7dd3fc, #34d399);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 999px;
+            padding: 5px 11px;
+            text-decoration: none;
+            box-shadow: 0 0 16px rgba(52, 211, 153, 0.18);
+        }
+
+        .employee-mode-link:hover {
+            color: #07111f;
+            filter: brightness(1.08);
+            text-decoration: none;
+        }
+
         .employee-layout {
             display: grid;
             grid-template-columns: 360px minmax(0, 1fr);
@@ -306,6 +336,11 @@
         <h1 class="employee-title">Employee Mission Control</h1>
         <p class="employee-subtitle">Create and manage operator records with clean, fast actions.</p>
         <span class="employee-counter" th:text="'Total Records: ' + ${#lists.size(employeeData)}">Total Records: 0</span>
+        <span class="employee-mode-switch" th:if="${canSwitchEmployeeMode}">
+            <a class="employee-mode-link" th:href="@{/employee/manage(mode='individual')}">
+                <i class="fa-solid fa-user"></i> Individual Mode
+            </a>
+        </span>
     </section>
 
     <section class="employee-layout">
