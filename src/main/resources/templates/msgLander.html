@@ -1,303 +1,535 @@
 <html layout:decorate="~{base}">
 <div layout:fragment="content">
+    <!-- Inline styles to override bootstrap defaults and implement WhatsApp cosmic design -->
     <style>
-        .cosmic-card {
-            background: rgba(10, 15, 25, 0.7);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 2.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
-                0 0 20px rgba(120, 180, 255, 0.1);
+        .chat-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            position: relative;
+            height: calc(100vh - 120px);
+            padding: 10px;
+        }
+
+        .chat-container {
+            display: flex;
+            width: 100%;
+            max-width: 1100px;
+            height: 100%;
+            background: rgba(10, 15, 28, 0.75);
+            backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 25px rgba(99, 102, 241, 0.1);
             overflow: hidden;
         }
 
-        .cosmic-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at center, rgba(120, 180, 255, 0.05) 0%, transparent 70%);
-            pointer-events: none;
+        /* Sidebar styling */
+        .chat-sidebar {
+            width: 340px;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            background: rgba(15, 22, 40, 0.4);
         }
 
-        .cosmic-title {
-            font-family: 'Orbitron', sans-serif;
-            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .app-title {
+            font-family: 'Segoe UI', 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .highlight-chat {
+            background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
             -webkit-background-clip: text;
-            background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 2rem;
-            margin-bottom: 2rem;
+            display: inline;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 10px 15px 10px 40px;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+
+        .contact-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar */
+        .contact-list::-webkit-scrollbar,
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .contact-list::-webkit-scrollbar-thumb,
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .contact-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .contact-item.active {
+            background: rgba(99, 102, 241, 0.15);
+            border-left: 4px solid #6366f1;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .avatar.group-avatar {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        }
+
+        .status-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #0f172a;
+        }
+
+        .status-dot.online {
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        .status-dot.offline {
+            background: #94a3b8;
+        }
+
+        .contact-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contact-name-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            color: #f8fafc;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .contact-time {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .contact-last-msg {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Main Chat Window */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(5, 8, 16, 0.4);
+            position: relative;
+        }
+
+        .chat-placeholder {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            gap: 15px;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .chat-placeholder i {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .chat-header {
+            padding: 15px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 22, 40, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .chat-header-info {
             display: flex;
             align-items: center;
             gap: 15px;
         }
 
-        .sender-badge {
-            background: rgba(120, 180, 255, 0.1);
-            border: 1px solid rgba(120, 180, 255, 0.2);
-            border-radius: 12px;
-            padding: 12px 20px;
-            margin-bottom: 2rem;
+        .chat-header-name {
+            font-weight: 600;
+            color: #fff;
+            font-size: 1.05rem;
+        }
+
+        .chat-header-status {
+            font-size: 0.8rem;
+            color: #10b981;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
             display: flex;
-            align-items: center;
-            gap: 12px;
+            flex-direction: column;
+            gap: 15px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
         }
 
-        .sender-status {
-            width: 8px;
-            height: 8px;
-            background: #4ade80;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #4ade80;
-            animation: pulse 2s infinite;
+        .message-bubble {
+            max-width: 60%;
+            padding: 10px 14px 8px 14px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+            animation: fadeInMessage 0.25s ease-out;
         }
 
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
+        @keyframes fadeInMessage {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
                 opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.5);
-                opacity: 0.5;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2.5rem;
+        .message-bubble.outgoing {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-bottom-right-radius: 4px;
+            color: #f1f5f9;
         }
 
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
+        .message-bubble.incoming {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom-left-radius: 4px;
+            color: #f1f5f9;
         }
 
-        .form-section-title {
-            font-size: 0.85rem;
+        .msg-sender {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #a5b4fc;
+            margin-bottom: 2px;
+        }
+
+        .msg-type-tag {
+            align-self: flex-start;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #94a3b8;
-            margin-bottom: 1rem;
-            display: block;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
         }
 
-        .cosmic-input-wrapper {
-            position: relative;
+        .msg-type-tag.normal {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
         }
 
-        .cosmic-textarea {
-            width: 100%;
-            min-height: 180px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.25rem;
-            color: #fff;
-            font-size: 1rem;
-            resize: none;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-
-        .cosmic-textarea:focus {
-            border-color: #6366f1;
-            background: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-        }
-
-        .quick-groups {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 2rem;
-        }
-
-        .group-chip {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 10px 16px;
-            color: #e2e8f0;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .group-chip:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #6366f1;
-            transform: translateY(-2px);
-        }
-
-        .group-chip i {
-            font-size: 1rem;
-        }
-
-        .group-chip.mpr i {
+        .msg-type-tag.docsquad {
+            background: rgba(248, 113, 113, 0.2);
             color: #f87171;
         }
 
-        .group-chip.tea i {
+        .msg-type-tag.leave {
+            background: rgba(251, 191, 36, 0.2);
             color: #fbbf24;
         }
 
-        .group-chip.crex i {
-            color: #60a5fa;
+        .message-content {
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
-        .send-btn {
+        .message-time-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+            margin-top: 2px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        .message-status-icon {
+            font-size: 0.8rem;
+            color: #6366f1;
+        }
+
+        /* Footer input styling */
+        .chat-footer {
+            padding: 20px 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 22, 40, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-input-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .msg-type-select {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 12px;
+            padding: 10px;
+            outline: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: 140px;
+        }
+
+        .msg-type-select option {
+            background: #111827;
+            color: #fff;
+        }
+
+        .chat-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .chat-input {
             width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 10px 15px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            resize: none;
+            max-height: 100px;
+            height: 44px;
+            transition: all 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .send-message-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             border: none;
-            border-radius: 14px;
-            padding: 15px;
             color: #fff;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-top: 2rem;
-            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
         }
 
-        .send-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4);
+        .send-message-btn:hover {
+            transform: scale(1.05);
             filter: brightness(1.1);
         }
 
-        .send-btn:active {
-            transform: translateY(0);
+        .send-message-btn:active {
+            transform: scale(0.95);
         }
 
-        /* Select2 Customization */
-        .select2-container--default .select2-selection--multiple {
-            background: rgba(0, 0, 0, 0.3) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 16px !important;
-            min-height: 50px !important;
-            padding: 5px 10px !important;
+        .footer-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #64748b;
         }
 
-        .select2-container--default.select2-container--focus .select2-selection--multiple {
-            border-color: #6366f1 !important;
-        }
-
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            background: rgba(99, 102, 241, 0.2) !important;
-            border: 1px solid rgba(99, 102, 241, 0.3) !important;
-            border-radius: 8px !important;
-            color: #fff !important;
-            /* padding: 2px 10px !important; */
-            margin-top: 5px !important;
-        }
-
-        .select2-dropdown {
-            background: #111827 !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 12px !important;
-            overflow: hidden !important;
-        }
-
-        .select2-results__option {
-            padding: 10px 15px !important;
-            color: #94a3b8 !important;
-        }
-
-        .select2-results__option--highlighted[aria-selected] {
-            background-color: #6366f1 !important;
-            color: #fff !important;
+        .char-counter {
+            text-align: right;
         }
     </style>
 
-    <div class="cosmic-card">
-        <h2 class="cosmic-title">🕊️ Nēnu nīke Dūtanu</h2>
+    <div class="chat-wrapper">
+        <div class="chat-container">
+            <!-- Sidebar -->
+            <div class="chat-sidebar">
+                <div class="sidebar-header">
+                    <h3 class="app-title"><span>🔮</span> <span>Kutti <span class="highlight-chat">Chat</span>han</span></h3>
+                    <div class="search-wrapper">
+                        <i class="fa fa-search search-icon"></i>
+                        <input type="text" class="search-input" id="searchContacts" placeholder="Search chats...">
+                    </div>
+                </div>
+                <div class="contact-list" id="contactList">
+                    <!-- Loaded dynamically via AJAX -->
+                    <div style="text-align: center; color: #64748b; margin-top: 50px;">
+                        <i class="fa fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 10px;"></i>
+                        <p>Syncing transmissions...</p>
+                    </div>
+                </div>
+            </div>
 
-        <div class="sender-badge">
-            <div class="sender-status"></div>
-            <div>
-                <span class="form-section-title" style="margin-bottom: 0; font-size: 0.7rem;">Verified Identity</span>
-                <span style="color: #fff; font-weight: 600;"
-                    th:text="${senderName == 'Unknown Sender' ? 'Unknown Sender (' + clientIp + ')' : senderName}"></span>
+            <!-- Chat Main -->
+            <div class="chat-main" id="chatMain">
+                <!-- Shown when no contact is selected -->
+                <div class="chat-placeholder" id="chatPlaceholder">
+                    <i class="fa-solid fa-message" style="font-size: 3.5rem; margin-bottom: 15px;"></i>
+                    <h4>Select a contact to begin transmitting</h4>
+                    <p style="font-size: 0.85rem; max-width: 300px; color: #64748b;">Direct messages trigger instant SSH popup alerts on target systems.</p>
+                </div>
+
+                <!-- Chat Header (Hidden by default) -->
+                <div class="chat-header" id="chatHeader" style="display: none;">
+                    <div class="chat-header-info">
+                        <div class="avatar" id="chatHeaderAvatar">D</div>
+                        <div>
+                            <div class="chat-header-name" id="chatHeaderName">Unknown User</div>
+                            <div class="chat-header-status" id="chatHeaderStatus">online</div>
+                        </div>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 0.8rem; font-family: monospace;" id="chatHeaderIp"></span>
+                    </div>
+                </div>
+
+                <!-- Chat Messages thread (Hidden by default) -->
+                <div class="chat-messages" id="chatMessages" style="display: none;">
+                    <!-- Loaded dynamically -->
+                </div>
+
+                <!-- Chat Input footer (Hidden by default) -->
+                <div class="chat-footer" id="chatFooter" style="display: none;">
+                    <div class="chat-input-row">
+                        <select class="msg-type-select" id="msgType" title="Message Type">
+                            <option value="normal">Normal</option>
+                            <option value="docsquad">DocSquad</option>
+                            <option value="leave">Leave Portal</option>
+                        </select>
+                        <div class="chat-input-wrapper">
+                            <textarea class="chat-input" id="messageInput" placeholder="Type a message..." maxlength="500"></textarea>
+                        </div>
+                        <button class="send-message-btn" id="sendMessageBtn" title="Transmit">
+                            <i class="fa fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="footer-info-row">
+                        <span>Press Enter to send (Shift + Enter for new line)</span>
+                        <span class="char-counter" id="charCounter">0 / 500</span>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <form th:action="@{/message/sendMsg}" method="POST">
-            <div class="form-grid">
-                <!-- Left Column: Message -->
-                <div class="cosmic-input-wrapper">
-                    <label class="form-section-title">Message Type</label>
-                    <select class="form-select cosmic-textarea" name="msgType" style="min-height: auto; padding: 12px; height: 50px; margin-bottom: 1.5rem;" required>
-                        <option value="normal">Normal Message</option>
-                        <option value="docsquad">DocSquad Message</option>
-                        <option value="leave">Leave Portal Message</option>
-                    </select>
-
-                    <label class="form-section-title">Cosmic Transmission</label>
-                    <textarea class="cosmic-textarea" id="msgContainer" name="msgContainer"
-                        placeholder="Type your celestial message here..." required maxlength="500"></textarea>
-                    <div id="charCount" style="text-align: right; color: #64748b; font-size: 0.75rem; margin-top: 5px;">
-                        0 / 500</div>
-                </div>
-
-                <!-- Right Column: Recipients -->
-                <div>
-                    <label class="form-section-title">Select Recipients</label>
-                    <div class="quick-groups">
-                        <div class="group-chip mpr" id="grp_dd_mpr">
-                            <i class="fa-solid fa-file-invoice"></i> MPR
-                        </div>
-                        <div class="group-chip tea" id="grp_dd_tea">
-                            <i class="fa-solid fa-mug-hot"></i> Spill Tea
-                        </div>
-                        <div class="group-chip crex" id="grp_dd_crex">
-                            <i class="fa-solid fa-baseball-bat-ball"></i> Crex
-                        </div>
-                    </div>
-
-                    <div class="cosmic-input-wrapper">
-                        <select class="form-select" name="hostId" id="hostdd" required multiple
-                            data-placeholder="Choose explorers...">
-                            <option th:each="host : ${groupHosts}" th:value="${host.id}" th:text="${host.userName}">
-                            </option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="send-btn">
-                        <i class="fa fa-paper-plane"></i>
-                        Launch Transmission
-                    </button>
-                </div>
-            </div>
-        </form>
     </div>
 
+    <!-- Pass current logged-in sender IP and context to JS -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const clientIp = /*[[${clientIp}]]*/ '127.0.0.1';
+        const senderName = /*[[${senderName}]]*/ 'Unknown Sender';
+        /*]]>*/
+    </script>
     <script th:src="@{/js/msgLander.js}"></script>
 </div>
-
 </html>
