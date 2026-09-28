@@ -43,8 +43,33 @@ public class MessageController {
     @Value("${developer.mock.ip:}")
     private String developerMockIp;
 
-    @Value("${server.callback.url:http://10.162.6.11:7003}")
+    @Value("${server.callback.url:}")
     private String serverCallbackUrl;
+
+    private String resolveCallbackUrl(HttpServletRequest request) {
+        if (serverCallbackUrl != null && !serverCallbackUrl.trim().isEmpty()) {
+            return serverCallbackUrl.trim().replaceAll("/+$", "") + "/message/api/confirm";
+        }
+
+        String scheme = request.getScheme();
+        if (request.getHeader("X-Forwarded-Proto") != null && !request.getHeader("X-Forwarded-Proto").isEmpty()) {
+            scheme = request.getHeader("X-Forwarded-Proto").split(",")[0].trim();
+        }
+
+        String hostHeader = request.getHeader("X-Forwarded-Host");
+        if (hostHeader == null || hostHeader.isEmpty()) {
+            hostHeader = request.getHeader("Host");
+        }
+
+        if (hostHeader != null && !hostHeader.trim().isEmpty()) {
+            return scheme + "://" + hostHeader.trim().split(",")[0].trim() + "/message/api/confirm";
+        }
+
+        String serverName = request.getServerName();
+        int serverPort = request.getServerPort();
+        String portPart = (serverPort == 80 || serverPort == 443) ? "" : ":" + serverPort;
+        return scheme + "://" + serverName + portPart + "/message/api/confirm";
+    }
 
     public MessageController(sshService sshService, groupHostService groupHostService,
             employeeService employeeService, commonServices theCommonService,
@@ -174,7 +199,7 @@ public class MessageController {
                         "nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
             } else if ("confirm".equals(msgType)) {
                 //------ Confirmation message (OK / Cancel) ------ 
-                String callbackUrl = serverCallbackUrl + "/message/api/confirm";
+                String callbackUrl = resolveCallbackUrl(request);
                 String dialogFlow = "if zenity --question " +
                         "--title='🕊️ Doothan Confirmation' " +
                         "--ok-label='OK' --cancel-label='Cancel' " +
@@ -455,6 +480,8 @@ public class MessageController {
             }
         }
 
+        String callbackUrl = resolveCallbackUrl(request);
+
         for (groupHost gh : recipients) {
             String hostIp = gh.getHost();
             String hostUserName = gh.getUserName();
@@ -474,7 +501,6 @@ public class MessageController {
                     String dialogFlow = "if zenity --question --title='Doothan Incoming...' --ok-label='Open Leave Portal' --cancel-label='Close' --text=" + shellQuote(text) + "; then xdg-open " + shellQuote(url) + " >/dev/null 2>&1; fi";
                     command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
                 } else if ("confirm".equals(msgType)) {
-                    String callbackUrl = serverCallbackUrl + "/message/api/confirm";
                     String dialogFlow = "if zenity --question --title='🕊️ Doothan Confirmation' --ok-label='OK' --cancel-label='Cancel' --text=" + shellQuote(fullMessage) + "; then STATUS='OK'; else STATUS='CANCEL'; fi; " +
                             "curl -s --connect-timeout 5 --max-time 10 -X POST " + shellQuote(callbackUrl) + " -d 'messageId=" + targetMsgId + "&recipientIp=" + hostIp + "&status='\"$STATUS\" >/dev/null 2>&1";
                     command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
