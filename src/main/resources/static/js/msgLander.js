@@ -154,6 +154,7 @@ $(function () {
         $("#msgType").val("normal");
 
         // Load chat history
+        window._lastRenderedState = null;
         loadChatHistory(contact, true);
 
         // Reset polling timer to avoid collisions
@@ -190,11 +191,15 @@ $(function () {
         const clientHeight = $chatMessages[0].clientHeight;
         const isScrolledToBottom = scrollHeight - scrollTop - clientHeight < 100;
 
-        // Skip redraw if message count hasn't changed and we aren't forcing a reload
-        const currentBubbleCount = $chatMessages.find(".message-bubble").length;
-        if (!forceScroll && messages.length === currentBubbleCount) {
+        // Skip redraw if message content and confirmation states haven't changed
+        const messagesStateKey = JSON.stringify(messages.map(m => ({
+            id: m.id,
+            confs: (m.confirmations || []).map(c => c.recipientIp + ':' + c.status)
+        })));
+        if (!forceScroll && window._lastRenderedState === messagesStateKey) {
             return;
         }
+        window._lastRenderedState = messagesStateKey;
 
         $chatMessages.empty();
 
@@ -212,15 +217,111 @@ $(function () {
             const bubbleClass = isOutgoing ? 'outgoing' : 'incoming';
             const displaySender = isOutgoing ? 'You' : msg.senderName;
             
-            const typeTag = msg.msgType !== 'normal' ? `<span class="msg-type-tag ${msg.msgType}">${msg.msgType}</span>` : '';
+            const typeTag = msg.msgType !== 'normal' ? `<span class="msg-type-tag ${msg.msgType}">${msg.msgType === 'confirm' ? 'Confirmation' : msg.msgType}</span>` : '';
             const statusCheck = isOutgoing ? '<i class="fa-solid fa-check-double message-status-icon"></i>' : '';
             const formattedTime = formatMessageTime(msg.timestamp);
+
+            // Render confirmation details if type is confirm
+            let confirmationHtml = '';
+            if (msg.msgType === 'confirm') {
+                const confs = msg.confirmations || [];
+                if (isOutgoing) {
+                    // Sent by current user -> View responses
+                    if (selectedContact && selectedContact.isGroup && confs.length > 1) {
+                        const okCount = confs.filter(c => c.status === 'OK').length;
+                        const cancelCount = confs.filter(c => c.status === 'CANCEL').length;
+                        const pendingCount = confs.filter(c => c.status === 'PENDING').length;
+
+                        let listItems = '';
+                        confs.forEach(c => {
+                            let pill = '';
+                            if (c.status === 'OK') {
+                                pill = `<span class="confirmation-status-pill ok"><i class="fa fa-check"></i> OK</span>`;
+                            } else if (c.status === 'CANCEL') {
+                                pill = `<span class="confirmation-status-pill cancel"><i class="fa fa-times"></i> Cancel</span>`;
+                            } else {
+                                pill = `<span class="confirmation-status-pill pending"><i class="fa fa-clock"></i> Pending</span>`;
+                            }
+                            const rTime = c.respondedAt ? `<span class="conf-time">${formatMessageTime(c.respondedAt)}</span>` : '';
+                            listItems += `
+                                <div class="group-conf-item">
+                                    <span>${escapeHtml(c.recipientName || c.recipientIp)}</span>
+                                    <div>${pill} ${rTime}</div>
+                                </div>
+                            `;
+                        });
+
+                        confirmationHtml = `
+                            <div class="confirmation-box">
+                                <div class="confirmation-title">
+                                    <span>Responses</span>
+                                    <span style="color: #cbd5e1;">${okCount} OK • ${cancelCount} Cancel • ${pendingCount} Pending</span>
+                                </div>
+                                <div class="group-conf-list">
+                                    ${listItems}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // 1-on-1 outgoing
+                        const conf = confs[0];
+                        if (conf) {
+                            let pill = '';
+                            if (conf.status === 'OK') {
+                                pill = `<span class="confirmation-status-pill ok"><i class="fa fa-check"></i> Confirmed (OK)</span> <span class="conf-time">${formatMessageTime(conf.respondedAt)}</span>`;
+                            } else if (conf.status === 'CANCEL') {
+                                pill = `<span class="confirmation-status-pill cancel"><i class="fa fa-times"></i> Cancelled</span> <span class="conf-time">${formatMessageTime(conf.respondedAt)}</span>`;
+                            } else {
+                                pill = `<span class="confirmation-status-pill pending"><i class="fa fa-clock"></i> Awaiting response...</span>`;
+                            }
+                            confirmationHtml = `
+                                <div class="confirmation-box">
+                                    <div class="confirmation-title"><span>Recipient Response</span></div>
+                                    <div>${pill}</div>
+                                </div>
+                            `;
+                        }
+                    }
+                } else {
+                    // Incoming message to current user -> Provide action buttons or show your response
+                    const myConf = confs.find(c => c.recipientIp === clientIp) || confs[0];
+                    if (myConf && myConf.status === 'PENDING') {
+                        confirmationHtml = `
+                            <div class="confirmation-box">
+                                <div class="confirmation-title"><span>Confirmation Requested</span></div>
+                                <div class="confirmation-actions">
+                                    <button class="btn-confirm-action btn-confirm-ok" data-msg-id="${msg.id}" data-ip="${clientIp}">
+                                        <i class="fa fa-check"></i> OK
+                                    </button>
+                                    <button class="btn-confirm-action btn-confirm-cancel" data-msg-id="${msg.id}" data-ip="${clientIp}">
+                                        <i class="fa fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else if (myConf) {
+                        let pill = '';
+                        if (myConf.status === 'OK') {
+                            pill = `<span class="confirmation-status-pill ok"><i class="fa fa-check"></i> You selected OK</span> <span class="conf-time">${formatMessageTime(myConf.respondedAt)}</span>`;
+                        } else if (myConf.status === 'CANCEL') {
+                            pill = `<span class="confirmation-status-pill cancel"><i class="fa fa-times"></i> You selected Cancel</span> <span class="conf-time">${formatMessageTime(myConf.respondedAt)}</span>`;
+                        }
+                        confirmationHtml = `
+                            <div class="confirmation-box">
+                                <div class="confirmation-title"><span>Your Response</span></div>
+                                <div>${pill}</div>
+                            </div>
+                        `;
+                    }
+                }
+            }
 
             const $bubble = $(`
                 <div class="message-bubble ${bubbleClass}">
                     <div class="msg-sender">${displaySender}</div>
                     ${typeTag}
                     <div class="message-content">${escapeHtml(msg.messageContent)}</div>
+                    ${confirmationHtml}
                     <div class="message-time-row">
                         <span class="message-time">${formattedTime}</span>
                         ${statusCheck}
@@ -282,6 +383,37 @@ $(function () {
             }
         });
     }
+
+    // Confirmation action button handler (OK / Cancel)
+    $(document).on("click", ".btn-confirm-action", function (e) {
+        e.preventDefault();
+        const $btn = $(this);
+        const messageId = $btn.data("msg-id");
+        const recipientIp = $btn.data("ip");
+        const status = $btn.hasClass("btn-confirm-ok") ? "OK" : "CANCEL";
+
+        $btn.closest(".confirmation-actions").find("button").prop("disabled", true);
+
+        $.ajax({
+            url: "/message/api/confirm",
+            method: "POST",
+            data: {
+                messageId: messageId,
+                recipientIp: recipientIp,
+                status: status
+            },
+            success: function () {
+                window._lastRenderedState = null;
+                if (selectedContact) {
+                    loadChatHistory(selectedContact, false);
+                }
+            },
+            error: function (err) {
+                console.error("Failed to submit confirmation:", err);
+                $btn.closest(".confirmation-actions").find("button").prop("disabled", false);
+            }
+        });
+    });
 
     function pollUpdate() {
         if (selectedContact) {

@@ -2,6 +2,8 @@ package com.bruhmosuki.dhoomaKedu.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "chat_message")
@@ -34,6 +36,9 @@ public class chatMessage {
 
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
+
+    @Transient
+    private List<chatMessageConfirmation> confirmations = new ArrayList<>();
 
     public chatMessage() {
     }
@@ -120,6 +125,14 @@ public class chatMessage {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public List<chatMessageConfirmation> getConfirmations() {
+        return confirmations;
+    }
+
+    public void setConfirmations(List<chatMessageConfirmation> confirmations) {
+        this.confirmations = confirmations;
     }
 
     @Override

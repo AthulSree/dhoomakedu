@@ -12,11 +12,15 @@ import com.bruhmosuki.dhoomaKedu.service.groupHostService;
 import com.bruhmosuki.dhoomaKedu.service.commonServices;
 import com.bruhmosuki.dhoomaKedu.service.employeeService;
 import com.bruhmosuki.dhoomaKedu.dao.chatMessageRepository;
+import com.bruhmosuki.dhoomaKedu.dao.chatMessageConfirmationRepository;
 import com.bruhmosuki.dhoomaKedu.entity.chatMessage;
+import com.bruhmosuki.dhoomaKedu.entity.chatMessageConfirmation;
 import org.springframework.http.ResponseEntity;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.time.LocalDateTime;
@@ -33,19 +37,25 @@ public class MessageController {
     private final employeeService employeeService;
     private final commonServices theCommonService;
     private final chatMessageRepository chatMessageRepository;
+    private final chatMessageConfirmationRepository confirmationRepository;
     private final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     @Value("${developer.mock.ip:}")
     private String developerMockIp;
 
+    @Value("${server.callback.url:http://10.162.6.11:7003}")
+    private String serverCallbackUrl;
+
     public MessageController(sshService sshService, groupHostService groupHostService,
             employeeService employeeService, commonServices theCommonService,
-            chatMessageRepository chatMessageRepository) {
+            chatMessageRepository chatMessageRepository,
+            chatMessageConfirmationRepository confirmationRepository) {
         this.sshService = sshService;
         this.groupHostService = groupHostService;
         this.employeeService = employeeService;
         this.theCommonService = theCommonService;
         this.chatMessageRepository = chatMessageRepository;
+        this.confirmationRepository = confirmationRepository;
     }
 
     @GetMapping("/msgLander")
@@ -99,13 +109,38 @@ public class MessageController {
 
         // Append sender name to message
         String fullMessage = message + "\n\n\nRegards,\n" + senderName + "\n[Nēnu nīke Dūtanu]";
+        LocalDateTime now = LocalDateTime.now();
 
         for (Integer hostId1 : hostId) {
             groupHost groupHost = groupHostService.findById(hostId1);
+            if (groupHost == null) continue;
             System.out.println("hostIds: " + groupHost.getUserName());
             String hostIp = groupHost.getHost();
             String hostUserName = groupHost.getUserName();
             String hostPassword = groupHost.getPassword();
+
+            chatMessage chatMsg = new chatMessage(
+                clientIp,
+                senderName,
+                hostIp,
+                hostUserName,
+                message,
+                msgType,
+                null,
+                now
+            );
+            chatMessage savedMsg = chatMessageRepository.save(chatMsg);
+
+            if ("confirm".equals(msgType)) {
+                chatMessageConfirmation conf = new chatMessageConfirmation(
+                    savedMsg.getId(),
+                    hostIp,
+                    hostUserName,
+                    "PENDING",
+                    null
+                );
+                confirmationRepository.save(conf);
+            }
 
             // theCommonService.showError("Sending message to " + hostIp + " as " + hostUserName);
 
@@ -134,6 +169,22 @@ public class MessageController {
                         "--text=" + shellQuote(text) + "; then " +
                         "xdg-open " + shellQuote(url) + " >/dev/null 2>&1; " +
                         "fi";
+
+                command = "export DISPLAY=:0; " +
+                        "nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+            } else if ("confirm".equals(msgType)) {
+                //------ Confirmation message (OK / Cancel) ------ 
+                String callbackUrl = serverCallbackUrl + "/message/api/confirm";
+                String dialogFlow = "if zenity --question " +
+                        "--title='🕊️ Doothan Confirmation' " +
+                        "--ok-label='OK' --cancel-label='Cancel' " +
+                        "--text=" + shellQuote(fullMessage) + "; then " +
+                        "  STATUS='OK'; " +
+                        "else " +
+                        "  STATUS='CANCEL'; " +
+                        "fi; " +
+                        "curl -s --connect-timeout 5 --max-time 10 -X POST " + shellQuote(callbackUrl) + " " +
+                        "-d 'messageId=" + savedMsg.getId() + "&recipientIp=" + hostIp + "&status='\"$STATUS\" >/dev/null 2>&1";
 
                 command = "export DISPLAY=:0; " +
                         "nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
@@ -279,6 +330,17 @@ public class MessageController {
             history = chatMessageRepository.findChatHistory(clientIp, target);
         }
 
+        if (history != null && !history.isEmpty()) {
+            List<Long> msgIds = history.stream().map(chatMessage::getId).toList();
+            List<chatMessageConfirmation> allConfs = confirmationRepository.findByMessageIdIn(msgIds);
+            Map<Long, List<chatMessageConfirmation>> confMap = allConfs.stream()
+                .collect(Collectors.groupingBy(chatMessageConfirmation::getMessageId));
+
+            for (chatMessage msg : history) {
+                msg.setConfirmations(confMap.getOrDefault(msg.getId(), Collections.emptyList()));
+            }
+        }
+
         return ResponseEntity.ok(history);
     }
 
@@ -303,100 +365,179 @@ public class MessageController {
             } else if ("Spill Tea".equalsIgnoreCase(groupName) || "tea".equalsIgnoreCase(groupName)) {
                 groupName = "Spill Tea";
                 memberIds = new String[]{"1", "2", "3", "4", "9"};
-              } else if ("Crex".equalsIgnoreCase(groupName)) {
-                  memberIds = new String[]{"3"};
-              }
-              
-              for (String mId : memberIds) {
-                  try {
-                      groupHost gh = groupHostService.findById(Integer.parseInt(mId));
-                      if (gh != null) {
-                          recipients.add(gh);
-                      }
-                  } catch (Exception ignored) {}
-              }
-          } else if (hostIds != null && !hostIds.isEmpty()) {
-              for (Integer hostId : hostIds) {
-                  groupHost gh = groupHostService.findById(hostId);
-                  if (gh != null) {
-                      recipients.add(gh);
-                  }
-              }
-          } else {
-              response.put("success", false);
-              response.put("error", "No recipients specified");
-              return ResponseEntity.badRequest().body(response);
-          }
+            } else if ("Crex".equalsIgnoreCase(groupName)) {
+                memberIds = new String[]{"3"};
+            }
+            
+            for (String mId : memberIds) {
+                try {
+                    groupHost gh = groupHostService.findById(Integer.parseInt(mId));
+                    if (gh != null) {
+                        recipients.add(gh);
+                    }
+                } catch (Exception ignored) {}
+            }
+        } else if (hostIds != null && !hostIds.isEmpty()) {
+            for (Integer hostId : hostIds) {
+                groupHost gh = groupHostService.findById(hostId);
+                if (gh != null) {
+                    recipients.add(gh);
+                }
+            }
+        } else {
+            response.put("success", false);
+            response.put("error", "No recipients specified");
+            return ResponseEntity.badRequest().body(response);
+        }
 
-          if (recipients.isEmpty()) {
-              response.put("success", false);
-              response.put("error", "Recipients list is empty");
-              return ResponseEntity.badRequest().body(response);
-          }
+        if (recipients.isEmpty()) {
+            response.put("success", false);
+            response.put("error", "Recipients list is empty");
+            return ResponseEntity.badRequest().body(response);
+        }
 
-          String fullMessage = message + "\n\n\nRegards,\n" + senderName + "\n[Nēnu nīke Dūtanu]";
+        String fullMessage = message + "\n\n\nRegards,\n" + senderName + "\n[Nēnu nīke Dūtanu]";
 
-          LocalDateTime now = LocalDateTime.now();
-          if (groupName != null && !groupName.isEmpty()) {
-              chatMessage chatMsg = new chatMessage(
-                  clientIp,
-                  senderName,
-                  null,
-                  groupName + " Broadcast",
-                  message,
-                  msgType,
-                  groupName,
-                  now
-              );
-              chatMessageRepository.save(chatMsg);
-          } else {
-              for (groupHost gh : recipients) {
-                  chatMessage chatMsg = new chatMessage(
-                      clientIp,
-                      senderName,
-                      gh.getHost(),
-                      gh.getUserName(),
-                      message,
-                      msgType,
-                      null,
-                      now
-                  );
-                  chatMessageRepository.save(chatMsg);
-              }
-          }
+        Map<String, Long> recipientMsgIdMap = new HashMap<>();
+        LocalDateTime now = LocalDateTime.now();
 
-          for (groupHost gh : recipients) {
-              String hostIp = gh.getHost();
-              String hostUserName = gh.getUserName();
-              String hostPassword = gh.getPassword();
+        if (groupName != null && !groupName.isEmpty()) {
+            chatMessage chatMsg = new chatMessage(
+                clientIp,
+                senderName,
+                null,
+                groupName + " Broadcast",
+                message,
+                msgType,
+                groupName,
+                now
+            );
+            chatMessage savedMsg = chatMessageRepository.save(chatMsg);
 
-              executorService.submit(() -> {
-                  String command = "";
-                  if ("docsquad".equals(msgType)) {
-                      String url = "http://10.162.6.180:8015/docsquad/";
-                      String text = fullMessage + "\n\nLink: " + url;
-                      String dialogFlow = "if zenity --question --title='Doothan Incoming...' --ok-label='Open the byte-WhaSSH 2.0 / DocsQuad' --cancel-label='Close' --text=" + shellQuote(text) + "; then xdg-open " + shellQuote(url) + " >/dev/null 2>&1; fi";
-                      command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
-                  } else if ("leave".equals(msgType)) {
-                      String url = "http://10.162.6.188:7003/leaves/manage";
-                      String text = fullMessage + "\n\nLink: " + url;
-                      String dialogFlow = "if zenity --question --title='Doothan Incoming...' --ok-label='Open Leave Portal' --cancel-label='Close' --text=" + shellQuote(text) + "; then xdg-open " + shellQuote(url) + " >/dev/null 2>&1; fi";
-                      command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
-                  } else {
-                      command = "export DISPLAY=:0; nohup zenity --info --title='\uD83D\uDD4A\uFE0F Doothan Incoming...' --text=\"" + fullMessage + "\" > /dev/null 2>&1 &";
-                  }
+            for (groupHost gh : recipients) {
+                recipientMsgIdMap.put(gh.getHost(), savedMsg.getId());
+                if ("confirm".equals(msgType)) {
+                    chatMessageConfirmation conf = new chatMessageConfirmation(
+                        savedMsg.getId(),
+                        gh.getHost(),
+                        gh.getUserName(),
+                        "PENDING",
+                        null
+                    );
+                    confirmationRepository.save(conf);
+                }
+            }
+        } else {
+            for (groupHost gh : recipients) {
+                chatMessage chatMsg = new chatMessage(
+                    clientIp,
+                    senderName,
+                    gh.getHost(),
+                    gh.getUserName(),
+                    message,
+                    msgType,
+                    null,
+                    now
+                );
+                chatMessage savedMsg = chatMessageRepository.save(chatMsg);
+                recipientMsgIdMap.put(gh.getHost(), savedMsg.getId());
 
-                  sshService.sendCommand(hostIp, hostUserName, hostPassword, command);
-              });
-          }
+                if ("confirm".equals(msgType)) {
+                    chatMessageConfirmation conf = new chatMessageConfirmation(
+                        savedMsg.getId(),
+                        gh.getHost(),
+                        gh.getUserName(),
+                        "PENDING",
+                        null
+                    );
+                    confirmationRepository.save(conf);
+                }
+            }
+        }
 
-          response.put("success", true);
-          response.put("timestamp", now.toString());
-          return ResponseEntity.ok(response);
-      }
+        for (groupHost gh : recipients) {
+            String hostIp = gh.getHost();
+            String hostUserName = gh.getUserName();
+            String hostPassword = gh.getPassword();
+            Long targetMsgId = recipientMsgIdMap.get(hostIp);
 
-      private static String shellQuote(String s) {
-          return "'" + s.replace("'", "'\"'\"'") + "'";
-      }
+            executorService.submit(() -> {
+                String command = "";
+                if ("docsquad".equals(msgType)) {
+                    String url = "http://10.162.6.180:8015/docsquad/";
+                    String text = fullMessage + "\n\nLink: " + url;
+                    String dialogFlow = "if zenity --question --title='Doothan Incoming...' --ok-label='Open the byte-WhaSSH 2.0 / DocsQuad' --cancel-label='Close' --text=" + shellQuote(text) + "; then xdg-open " + shellQuote(url) + " >/dev/null 2>&1; fi";
+                    command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+                } else if ("leave".equals(msgType)) {
+                    String url = "http://10.162.6.188:7003/leaves/manage";
+                    String text = fullMessage + "\n\nLink: " + url;
+                    String dialogFlow = "if zenity --question --title='Doothan Incoming...' --ok-label='Open Leave Portal' --cancel-label='Close' --text=" + shellQuote(text) + "; then xdg-open " + shellQuote(url) + " >/dev/null 2>&1; fi";
+                    command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+                } else if ("confirm".equals(msgType)) {
+                    String callbackUrl = serverCallbackUrl + "/message/api/confirm";
+                    String dialogFlow = "if zenity --question --title='🕊️ Doothan Confirmation' --ok-label='OK' --cancel-label='Cancel' --text=" + shellQuote(fullMessage) + "; then STATUS='OK'; else STATUS='CANCEL'; fi; " +
+                            "curl -s --connect-timeout 5 --max-time 10 -X POST " + shellQuote(callbackUrl) + " -d 'messageId=" + targetMsgId + "&recipientIp=" + hostIp + "&status='\"$STATUS\" >/dev/null 2>&1";
+                    command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+                } else {
+                    command = "export DISPLAY=:0; nohup zenity --info --title='\uD83D\uDD4A\uFE0F Doothan Incoming...' --text=\"" + fullMessage + "\" > /dev/null 2>&1 &";
+                }
+
+                sshService.sendCommand(hostIp, hostUserName, hostPassword, command);
+            });
+        }
+
+        response.put("success", true);
+        response.put("timestamp", now.toString());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/api/confirm")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> recordConfirmation(
+            @RequestParam("messageId") Long messageId,
+            @RequestParam(value = "recipientIp", required = false) String recipientIp,
+            @RequestParam("status") String status,
+            HttpServletRequest request) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        if (recipientIp == null || recipientIp.isEmpty()) {
+            recipientIp = getClientIp(request);
+        }
+
+        String normalizedStatus = "OK".equalsIgnoreCase(status) ? "OK" : "CANCEL";
+        List<chatMessageConfirmation> confs = confirmationRepository.findByMessageId(messageId);
+        boolean updated = false;
+
+        for (chatMessageConfirmation conf : confs) {
+            if (recipientIp.equals(conf.getRecipientIp()) || confs.size() == 1) {
+                conf.setStatus(normalizedStatus);
+                conf.setRespondedAt(LocalDateTime.now());
+                confirmationRepository.save(conf);
+                updated = true;
+                break;
+            }
+        }
+
+        if (!updated && !confs.isEmpty()) {
+            for (chatMessageConfirmation conf : confs) {
+                if ("PENDING".equals(conf.getStatus())) {
+                    conf.setStatus(normalizedStatus);
+                    conf.setRespondedAt(LocalDateTime.now());
+                    confirmationRepository.save(conf);
+                    updated = true;
+                    break;
+                }
+            }
+        }
+
+        response.put("success", updated);
+        response.put("status", normalizedStatus);
+        return ResponseEntity.ok(response);
+    }
+
+    private static String shellQuote(String s) {
+        return "'" + s.replace("'", "'\"'\"'") + "'";
+    }
 
   }
