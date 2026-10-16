@@ -538,7 +538,59 @@
         </div>
     </div>
 
-    <!-- ── Panel 6: Quick Navigation ── -->
+    <!-- ── Panel 6: MPR Responsibility Policy Popup Control ── -->
+    <div class="settings-panel">
+        <h2 class="panel-title"><i class="fa-solid fa-shield-halved"></i> MPR Policy Overlay Control</h2>
+        <p class="section-hint" style="margin-bottom: 14px;">
+            Configure how the full-screen typing policy disclaimer appears on the Leave Management page.
+        </p>
+
+        <!-- Mode Selector -->
+        <div style="background: rgba(16,185,255,0.05); border: 1px solid rgba(159,232,255,0.15); border-radius: 14px; padding: 16px; margin-bottom: 16px;">
+            <div style="display:flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom: 12px;">
+                <div>
+                    <span style="font-size:0.8rem; color:#9fd8f5; text-transform:uppercase; letter-spacing:0.06em; font-family:'Orbitron',sans-serif;">Current Policy Mode:</span>
+                    <strong style="margin-left: 8px; color: #facc15; font-size: 0.95rem;" th:text="${policyMode}">DAILY_PER_IP</strong>
+                </div>
+                <div>
+                    <span style="font-size:0.8rem; color:rgba(220,235,255,0.7);">Acknowledged Today:</span>
+                    <strong style="margin-left: 6px; color: #50e8a0; font-size: 0.95rem;" th:text="${todayAckCount}">0</strong>
+                    <span style="font-size:0.75rem; color:rgba(220,235,255,0.5);">IP(s)</span>
+                </div>
+            </div>
+
+            <!-- Form to Switch Mode -->
+            <form th:action="@{/settings/policy/updateMode}" method="post" style="display:flex; gap:16px; flex-wrap:wrap; align-items:center;">
+                <label style="font-size:0.82rem; color:rgba(220,235,255,0.85); display:flex; align-items:center; gap:6px; cursor:pointer;">
+                    <input type="radio" name="mode" value="DAILY_PER_IP" th:checked="${policyMode == 'DAILY_PER_IP'}" onchange="this.form.submit()">
+                    <span>Once Daily per IP (Standard)</span>
+                </label>
+                <label style="font-size:0.82rem; color:rgba(220,235,255,0.85); display:flex; align-items:center; gap:6px; cursor:pointer;">
+                    <input type="radio" name="mode" value="ALWAYS_SHOW" th:checked="${policyMode == 'ALWAYS_SHOW'}" onchange="this.form.submit()">
+                    <span>Always Show (Force on Every Visit)</span>
+                </label>
+                <label style="font-size:0.82rem; color:rgba(220,235,255,0.85); display:flex; align-items:center; gap:6px; cursor:pointer;">
+                    <input type="radio" name="mode" value="DISABLED" th:checked="${policyMode == 'DISABLED'}" onchange="this.form.submit()">
+                    <span>Disabled</span>
+                </label>
+            </form>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <form th:action="@{/settings/policy/resetToday}" method="post" onsubmit="return confirm('Reset policy acknowledgments for today? All users will see the typing policy popup on their next visit.');">
+                <button type="submit" class="quick-link-btn" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.35); color: #fca5a5; cursor:pointer;">
+                    <i class="fa-solid fa-arrows-rotate"></i> Reset Today's Acknowledgments (Force Show for All)
+                </button>
+            </form>
+
+            <a th:href="@{/leaves/manage(forcePolicy=true)}" target="_blank" class="quick-link-btn" style="background: rgba(16,185,255,0.15); border: 1px solid rgba(16,185,255,0.35); color: #9fd8f5; text-decoration:none;">
+                <i class="fa-solid fa-eye"></i> Test / Preview Policy Popup Now
+            </a>
+        </div>
+    </div>
+
+    <!-- ── Panel 7: Quick Navigation ── -->
     <div class="settings-panel">
         <h2 class="panel-title"><i class="fa-solid fa-rocket"></i> Quick Navigation</h2>
         <div class="quick-links">

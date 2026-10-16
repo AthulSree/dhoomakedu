@@ -33,6 +33,12 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.VerticalAlignment;
 
+import com.bruhmosuki.dhoomaKedu.service.PolicyService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.time.LocalDate;
+
 @Controller
 @RequestMapping("/leaves")
 public class leavesController {
@@ -42,19 +48,23 @@ public class leavesController {
     private monthPeriodService theMonthPeriodService;
     private commonServices theCommonServices;
     private workorderService theWorkorderService;
+    private PolicyService thePolicyService;
 
     public leavesController(leavesService theLeaveService, employeeService theEmployeeService,
             monthPeriodService theMonthPeriodService, commonServices theCommonServices,
-            workorderService theWorkorderService) {
+            workorderService theWorkorderService, PolicyService thePolicyService) {
         this.theLeaveService = theLeaveService;
         this.theEmployeeService = theEmployeeService;
         this.theMonthPeriodService = theMonthPeriodService;
         this.theCommonServices = theCommonServices;
         this.theWorkorderService = theWorkorderService;
+        this.thePolicyService = thePolicyService;
     }
 
     @GetMapping("/manage")
-    public String manage(Model model, leaves theLeave) {
+    public String manage(Model model, leaves theLeave, HttpServletRequest request,
+                         @RequestParam(value = "forcePolicy", required = false, defaultValue = "false") boolean forcePolicy,
+                         @CookieValue(name = "dhooma_mpr_ack_ver", required = false) String ackVerCookie) {
         List<employee> theEmployee = theEmployeeService.findAll();
         monthPeriod theMonthPeriod = theMonthPeriodService.findAll().get(0);
         List<leaves> leavesList = theLeaveService.findByMonthPeriod(theMonthPeriod.getMonth(),
@@ -74,7 +84,39 @@ public class leavesController {
         System.out.println(theMonthPeriod);
         model.addAttribute("lastThreeMonths", lastThreeMonths);
         model.addAttribute("setMonth", theMonthPeriod);
+
+        String clientIp = theCommonServices.getUserIp(request);
+        boolean showPolicyPopup = thePolicyService.shouldShowPolicy(clientIp, forcePolicy);
+        if (!"ALWAYS_SHOW".equalsIgnoreCase(thePolicyService.getPolicyMode())) {
+            if (ackVerCookie != null && ackVerCookie.equals(String.valueOf(thePolicyService.getPolicyVersion())) && !forcePolicy) {
+                showPolicyPopup = false;
+            }
+        }
+        model.addAttribute("showPolicyPopup", showPolicyPopup);
+        model.addAttribute("clientIp", clientIp);
+        model.addAttribute("policyMode", thePolicyService.getPolicyMode());
+        model.addAttribute("policyVersion", thePolicyService.getPolicyVersion());
+
         return "leaves";
+    }
+
+    @PostMapping("/acknowledgePolicy")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> acknowledgePolicy(HttpServletRequest request, HttpServletResponse response) {
+        String clientIp = theCommonServices.getUserIp(request);
+        thePolicyService.acknowledgePolicy(clientIp);
+
+        long currentVer = thePolicyService.getPolicyVersion();
+        Cookie cookie = new Cookie("dhooma_mpr_ack_ver", String.valueOf(currentVer));
+        cookie.setPath("/");
+        cookie.setMaxAge(86400);
+        response.addCookie(cookie);
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("success", true);
+        resp.put("ip", clientIp);
+        resp.put("version", currentVer);
+        return ResponseEntity.ok(resp);
     }
 
     @PostMapping("/saveLeave")

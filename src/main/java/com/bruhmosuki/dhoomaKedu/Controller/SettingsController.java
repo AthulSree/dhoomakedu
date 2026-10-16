@@ -10,7 +10,9 @@ import com.bruhmosuki.dhoomaKedu.service.leavesService;
 import com.bruhmosuki.dhoomaKedu.service.monthPeriodService;
 import com.bruhmosuki.dhoomaKedu.service.workorderService;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import com.bruhmosuki.dhoomaKedu.service.PolicyService;
+
 @Controller
 @RequestMapping("/settings")
 public class SettingsController {
@@ -31,17 +35,20 @@ public class SettingsController {
     private final employeeService theEmployeeService;
     private final workorderService theWorkorderService;
     private final leavesService theLeaveService;
+    private final PolicyService thePolicyService;
 
     public SettingsController(monthPeriodService theMonthPeriodService,
                               commonServices theCommonServices,
                               employeeService theEmployeeService,
                               workorderService theWorkorderService,
-                              leavesService theLeaveService) {
+                              leavesService theLeaveService,
+                              PolicyService thePolicyService) {
         this.theMonthPeriodService = theMonthPeriodService;
         this.theCommonServices = theCommonServices;
         this.theEmployeeService = theEmployeeService;
         this.theWorkorderService = theWorkorderService;
         this.theLeaveService = theLeaveService;
+        this.thePolicyService = thePolicyService;
     }
 
     @GetMapping("/panel")
@@ -131,7 +138,39 @@ public class SettingsController {
         model.addAttribute("currentIp", currentIp);
         model.addAttribute("serverTime", serverTime);
 
+        // ── MPR Policy Popup Settings
+        model.addAttribute("policyMode", thePolicyService.getPolicyMode());
+        model.addAttribute("todayAckCount", thePolicyService.getTodayAcknowledgedCount());
+        model.addAttribute("todayAckList", thePolicyService.getTodayAcknowledgedList());
+
         return "settings";
+    }
+
+    @PostMapping("/policy/updateMode")
+    public String updatePolicyMode(@RequestParam("mode") String mode,
+                                   RedirectAttributes redirectAttributes) {
+        thePolicyService.setPolicyMode(mode);
+        redirectAttributes.addFlashAttribute("successMsg", "MPR Policy popup display mode updated to: " + mode);
+        return "redirect:/settings/panel";
+    }
+
+    @PostMapping("/policy/resetToday")
+    public String resetPolicyToday(HttpServletResponse response, RedirectAttributes redirectAttributes) {
+        thePolicyService.resetTodayAcknowledgements();
+
+        // Also explicitly clear acknowledgment cookies for the current admin/user session
+        Cookie c1 = new Cookie("dhooma_mpr_ack", "");
+        c1.setPath("/");
+        c1.setMaxAge(0);
+        response.addCookie(c1);
+
+        Cookie c2 = new Cookie("dhooma_mpr_ack_ver", "");
+        c2.setPath("/");
+        c2.setMaxAge(0);
+        response.addCookie(c2);
+
+        redirectAttributes.addFlashAttribute("successMsg", "Today's policy acknowledgments have been reset! All users will see the popup again.");
+        return "redirect:/settings/panel";
     }
 
     @PostMapping("/changeMonth")
