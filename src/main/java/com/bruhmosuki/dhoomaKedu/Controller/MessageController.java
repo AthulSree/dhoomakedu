@@ -2,6 +2,7 @@ package com.bruhmosuki.dhoomaKedu.Controller;
 
 import org.springframework.ui.Model;
 import com.bruhmosuki.dhoomaKedu.service.sshService;
+import com.bruhmosuki.dhoomaKedu.config.WebMvcConfig;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -526,8 +527,7 @@ public class MessageController {
                     }
                 }
                 String subDir = "chat-images";
-                String uploadDirPath = Paths.get(System.getProperty("user.dir"), "uploads", subDir).toAbsolutePath().toString();
-                File uploadFolder = new File(uploadDirPath);
+                File uploadFolder = new File(WebMvcConfig.getUploadBaseDirectory(), subDir);
                 if (!uploadFolder.exists()) {
                     uploadFolder.mkdirs();
                 }
@@ -535,14 +535,14 @@ public class MessageController {
                 String baseUuid = UUID.randomUUID().toString();
                 String filename = baseUuid + ext;
                 File targetFile = new File(uploadFolder, filename);
-                imageFile.transferTo(targetFile);
-                attachmentUrl = "/uploads/" + subDir + "/" + filename;
+                Files.copy(imageFile.getInputStream(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                attachmentUrl = "/message/uploads/" + subDir + "/" + filename;
 
                 // Create a scaled preview for desktop notification popups (max 460x320 px)
                 String previewFilename = "prev_" + baseUuid + ".png";
                 File previewFile = new File(uploadFolder, previewFilename);
                 saveScaledPreview(targetFile, previewFile, 460, 320);
-                previewAttachmentUrl = "/uploads/" + subDir + "/" + previewFilename;
+                previewAttachmentUrl = "/message/uploads/" + subDir + "/" + previewFilename;
             } catch (Exception e) {
                 System.err.println("Failed to save chat image: " + e.getMessage());
                 response.put("success", false);

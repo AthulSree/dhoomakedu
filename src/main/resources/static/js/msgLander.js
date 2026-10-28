@@ -321,11 +321,78 @@ $(function () {
                 }
             }
 
+    function normalizeAttachmentUrl(url) {
+        if (!url) return '';
+        if (url.startsWith('/uploads/')) {
+            return '/message' + url;
+        }
+        return url;
+    }
+
+    function optimizeImageBeforeUpload(file, callback) {
+        if (!file) {
+            callback(null);
+            return;
+        }
+        // If file is under 750 KB or is GIF/SVG, send as-is
+        if (file.size <= 750 * 1024 || file.type === 'image/gif' || file.type === 'image/svg+xml') {
+            callback(file);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const img = new Image();
+            img.onload = function () {
+                let width = img.width;
+                let height = img.height;
+                const maxDim = 1600;
+                if (width > maxDim || height > maxDim) {
+                    if (width > height) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+                }
+
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob(function (blob) {
+                    if (blob && blob.size < file.size) {
+                        const newName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+                        const optimizedFile = new File([blob], newName, {
+                            type: "image/jpeg",
+                            lastModified: Date.now()
+                        });
+                        callback(optimizedFile);
+                    } else {
+                        callback(file);
+                    }
+                }, "image/jpeg", 0.82);
+            };
+            img.onerror = function () {
+                callback(file);
+            };
+            img.src = e.target.result;
+        };
+        reader.onerror = function () {
+            callback(file);
+        };
+        reader.readAsDataURL(file);
+    }
+
             let imageHtml = '';
             if (msg.attachmentUrl) {
+                const imgUrl = normalizeAttachmentUrl(msg.attachmentUrl);
                 imageHtml = `
                     <div class="message-image-wrapper">
-                        <img src="${msg.attachmentUrl}" class="message-image" alt="Image" loading="lazy" />
+                        <img src="${imgUrl}" class="message-image" alt="Image" loading="lazy" />
                     </div>
                 `;
             }
@@ -368,45 +435,55 @@ $(function () {
         $("#sendMessageBtn").prop("disabled", true);
         $("#attachBtn").prop("disabled", true);
 
-        const formData = new FormData();
-        formData.append("message", message);
-        formData.append("msgType", msgType);
-        if (currentAttachedFile) {
-            formData.append("image", currentAttachedFile);
-        }
-
-        if (selectedContact.isGroup) {
-            formData.append("groupName", selectedContact.name);
-        } else {
-            formData.append("hostId[]", parseInt(selectedContact.id));
-        }
-
-        $.ajax({
-            url: "/message/api/send",
-            method: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (res) {
-                // Clear input & attachment
-                $("#messageInput").val("").trigger("input");
-                clearAttachment();
-                
-                // Re-enable inputs
-                $("#messageInput").prop("disabled", false).focus();
-                $("#sendMessageBtn").prop("disabled", false);
-                $("#attachBtn").prop("disabled", false);
-
-                // Reload contacts list and chat history
-                loadContacts(selectedContact.id);
-                loadChatHistory(selectedContact, true);
-            },
-            error: function (err) {
-                alert("Transmission failed. Please check the network or system status.");
-                $("#messageInput").prop("disabled", false);
-                $("#sendMessageBtn").prop("disabled", false);
-                $("#attachBtn").prop("disabled", false);
+        optimizeImageBeforeUpload(currentAttachedFile, function (fileToSend) {
+            const formData = new FormData();
+            formData.append("message", message);
+            formData.append("msgType", msgType);
+            if (fileToSend) {
+                formData.append("image", fileToSend);
             }
+
+            if (selectedContact.isGroup) {
+                formData.append("groupName", selectedContact.name);
+            } else {
+                formData.append("hostId[]", parseInt(selectedContact.id));
+            }
+
+            $.ajax({
+                url: "/message/api/send",
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    // Clear input & attachment
+                    $("#messageInput").val("").trigger("input");
+                    clearAttachment();
+                    
+                    // Re-enable inputs
+                    $("#messageInput").prop("disabled", false).focus();
+                    $("#sendMessageBtn").prop("disabled", false);
+                    $("#attachBtn").prop("disabled", false);
+
+                    // Reload contacts list and chat history
+                    loadContacts(selectedContact.id);
+                    loadChatHistory(selectedContact, true);
+                },
+                error: function (xhr, status, error) {
+                    let errorMsg = "Transmission failed. Please check the network or system status.";
+                    if (xhr.status === 413) {
+                        errorMsg = "Transmission failed (HTTP 413): The image is too large for the proxy server limit (client_max_body_size in Nginx).";
+                    } else if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMsg = "Transmission failed: " + xhr.responseJSON.error;
+                    } else if (xhr.status) {
+                        errorMsg = "Transmission failed (HTTP " + xhr.status + ": " + (xhr.statusText || error) + ").";
+                    }
+                    alert(errorMsg);
+                    $("#messageInput").prop("disabled", false);
+                    $("#sendMessageBtn").prop("disabled", false);
+                    $("#attachBtn").prop("disabled", false);
+                }
+            });
         });
     }
 
