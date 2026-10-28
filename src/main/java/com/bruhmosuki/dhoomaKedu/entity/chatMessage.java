@@ -25,7 +25,7 @@ public class chatMessage {
     @Column(name = "recipient_name", length = 100)
     private String recipientName;
 
-    @Column(name = "message_content", nullable = false, length = 1000)
+    @Column(name = "message_content", length = 1000)
     private String messageContent;
 
     @Column(name = "msg_type", nullable = false, length = 20)
@@ -33,6 +33,9 @@ public class chatMessage {
 
     @Column(name = "group_name", length = 50)
     private String groupName;
+
+    @Column(name = "attachment_url", length = 500)
+    private String attachmentUrl;
 
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
@@ -52,6 +55,19 @@ public class chatMessage {
         this.messageContent = messageContent;
         this.msgType = msgType;
         this.groupName = groupName;
+        this.timestamp = timestamp;
+    }
+
+    public chatMessage(String senderIp, String senderName, String recipientIp, String recipientName,
+                       String messageContent, String msgType, String groupName, String attachmentUrl, LocalDateTime timestamp) {
+        this.senderIp = senderIp;
+        this.senderName = senderName;
+        this.recipientIp = recipientIp;
+        this.recipientName = recipientName;
+        this.messageContent = messageContent;
+        this.msgType = msgType;
+        this.groupName = groupName;
+        this.attachmentUrl = attachmentUrl;
         this.timestamp = timestamp;
     }
 
@@ -135,6 +151,14 @@ public class chatMessage {
         this.confirmations = confirmations;
     }
 
+    public String getAttachmentUrl() {
+        return attachmentUrl;
+    }
+
+    public void setAttachmentUrl(String attachmentUrl) {
+        this.attachmentUrl = attachmentUrl;
+    }
+
     @Override
     public String toString() {
         return "chatMessage{" +
@@ -146,6 +170,7 @@ public class chatMessage {
                 ", messageContent='" + messageContent + '\'' +
                 ", msgType='" + msgType + '\'' +
                 ", groupName='" + groupName + '\'' +
+                ", attachmentUrl='" + attachmentUrl + '\'' +
                 ", timestamp=" + timestamp +
                 '}';
     }

@@ -3,6 +3,7 @@ $(function () {
     let contactsList = [];
     let pollingInterval = null;
     let lastContactsStateString = "";
+    let currentAttachedFile = null;
 
     // Load contacts initially
     loadContacts();
@@ -152,6 +153,7 @@ $(function () {
         // Reset message form inputs
         $("#messageInput").val("").trigger("input");
         $("#msgType").val("normal");
+        clearAttachment();
 
         // Load chat history
         window._lastRenderedState = null;
@@ -191,10 +193,11 @@ $(function () {
         const clientHeight = $chatMessages[0].clientHeight;
         const isScrolledToBottom = scrollHeight - scrollTop - clientHeight < 100;
 
-        // Skip redraw if message content and confirmation states haven't changed
+        // Skip redraw if message content, attachments, and confirmation states haven't changed
         const messagesStateKey = JSON.stringify(messages.map(m => ({
             id: m.id,
-            confs: (m.confirmations || []).map(c => c.recipientIp + ':' + c.status)
+            att: m.attachmentUrl,
+            confs: (m.confirmations || []).map(c => c.recipientIp + ':' + c.status + ':' + (c.replyText || ''))
         })));
         if (!forceScroll && window._lastRenderedState === messagesStateKey) {
             return;
@@ -210,6 +213,21 @@ $(function () {
                 </div>
             `);
             return;
+        }
+
+        function formatConfirmationPill(c) {
+            if (!c) return '';
+            if (c.status === 'OK') {
+                return `<span class="confirmation-status-pill ok"><i class="fa fa-check"></i> OK</span>`;
+            } else if (c.status === 'CANCEL') {
+                const rText = c.replyText ? `Cancel: ${escapeHtml(c.replyText)}` : 'Cancel';
+                return `<span class="confirmation-status-pill cancel" title="${escapeHtml(c.replyText || '')}"><i class="fa fa-times"></i> ${rText}</span>`;
+            } else if (c.status === 'CUSTOM') {
+                const rText = c.replyText ? escapeHtml(c.replyText) : 'Custom Reply';
+                return `<span class="confirmation-status-pill custom" title="${escapeHtml(c.replyText || '')}"><i class="fa fa-comment"></i> ${rText}</span>`;
+            } else {
+                return `<span class="confirmation-status-pill pending"><i class="fa fa-clock"></i> Pending</span>`;
+            }
         }
 
         messages.forEach(msg => {
@@ -230,18 +248,12 @@ $(function () {
                     if (selectedContact && selectedContact.isGroup && confs.length > 1) {
                         const okCount = confs.filter(c => c.status === 'OK').length;
                         const cancelCount = confs.filter(c => c.status === 'CANCEL').length;
+                        const customCount = confs.filter(c => c.status === 'CUSTOM').length;
                         const pendingCount = confs.filter(c => c.status === 'PENDING').length;
 
                         let listItems = '';
                         confs.forEach(c => {
-                            let pill = '';
-                            if (c.status === 'OK') {
-                                pill = `<span class="confirmation-status-pill ok"><i class="fa fa-check"></i> OK</span>`;
-                            } else if (c.status === 'CANCEL') {
-                                pill = `<span class="confirmation-status-pill cancel"><i class="fa fa-times"></i> Cancel</span>`;
-                            } else {
-                                pill = `<span class="confirmation-status-pill pending"><i class="fa fa-clock"></i> Pending</span>`;
-                            }
+                            const pill = formatConfirmationPill(c);
                             const rTime = c.respondedAt ? `<span class="conf-time">${formatMessageTime(c.respondedAt)}</span>` : '';
                             listItems += `
                                 <div class="group-conf-item">
@@ -255,7 +267,7 @@ $(function () {
                             <div class="confirmation-box">
                                 <div class="confirmation-title">
                                     <span>Responses</span>
-                                    <span style="color: #cbd5e1;">${okCount} OK • ${cancelCount} Cancel • ${pendingCount} Pending</span>
+                                    <span style="color: #cbd5e1;">${okCount} OK • ${cancelCount} Cancel • ${customCount} Custom • ${pendingCount} Pending</span>
                                 </div>
                                 <div class="group-conf-list">
                                     ${listItems}
@@ -266,18 +278,12 @@ $(function () {
                         // 1-on-1 outgoing
                         const conf = confs[0];
                         if (conf) {
-                            let pill = '';
-                            if (conf.status === 'OK') {
-                                pill = `<span class="confirmation-status-pill ok"><i class="fa fa-check"></i> Confirmed (OK)</span> <span class="conf-time">${formatMessageTime(conf.respondedAt)}</span>`;
-                            } else if (conf.status === 'CANCEL') {
-                                pill = `<span class="confirmation-status-pill cancel"><i class="fa fa-times"></i> Cancelled</span> <span class="conf-time">${formatMessageTime(conf.respondedAt)}</span>`;
-                            } else {
-                                pill = `<span class="confirmation-status-pill pending"><i class="fa fa-clock"></i> Awaiting response...</span>`;
-                            }
+                            const pill = formatConfirmationPill(conf);
+                            const rTime = conf.respondedAt ? `<span class="conf-time">${formatMessageTime(conf.respondedAt)}</span>` : '';
                             confirmationHtml = `
                                 <div class="confirmation-box">
                                     <div class="confirmation-title"><span>Recipient Response</span></div>
-                                    <div>${pill}</div>
+                                    <div>${pill} ${rTime}</div>
                                 </div>
                             `;
                         }
@@ -296,31 +302,43 @@ $(function () {
                                     <button class="btn-confirm-action btn-confirm-cancel" data-msg-id="${msg.id}" data-ip="${clientIp}">
                                         <i class="fa fa-times"></i> Cancel
                                     </button>
+                                    <button class="btn-confirm-action btn-confirm-custom" data-msg-id="${msg.id}" data-ip="${clientIp}">
+                                        <i class="fa fa-comment"></i> Custom Message
+                                    </button>
                                 </div>
                             </div>
                         `;
                     } else if (myConf) {
-                        let pill = '';
-                        if (myConf.status === 'OK') {
-                            pill = `<span class="confirmation-status-pill ok"><i class="fa fa-check"></i> You selected OK</span> <span class="conf-time">${formatMessageTime(myConf.respondedAt)}</span>`;
-                        } else if (myConf.status === 'CANCEL') {
-                            pill = `<span class="confirmation-status-pill cancel"><i class="fa fa-times"></i> You selected Cancel</span> <span class="conf-time">${formatMessageTime(myConf.respondedAt)}</span>`;
-                        }
+                        const pill = formatConfirmationPill(myConf);
+                        const rTime = myConf.respondedAt ? `<span class="conf-time">${formatMessageTime(myConf.respondedAt)}</span>` : '';
                         confirmationHtml = `
                             <div class="confirmation-box">
                                 <div class="confirmation-title"><span>Your Response</span></div>
-                                <div>${pill}</div>
+                                <div>${pill} ${rTime}</div>
                             </div>
                         `;
                     }
                 }
             }
 
+            let imageHtml = '';
+            if (msg.attachmentUrl) {
+                imageHtml = `
+                    <div class="message-image-wrapper">
+                        <img src="${msg.attachmentUrl}" class="message-image" alt="Image" loading="lazy" />
+                    </div>
+                `;
+            }
+
+            const showText = msg.messageContent && msg.messageContent !== '[📷 Image]' && msg.messageContent.trim().length > 0;
+            const contentHtml = showText ? `<div class="message-content">${escapeHtml(msg.messageContent)}</div>` : '';
+
             const $bubble = $(`
                 <div class="message-bubble ${bubbleClass}">
                     <div class="msg-sender">${displaySender}</div>
                     ${typeTag}
-                    <div class="message-content">${escapeHtml(msg.messageContent)}</div>
+                    ${imageHtml}
+                    ${contentHtml}
                     ${confirmationHtml}
                     <div class="message-time-row">
                         <span class="message-time">${formattedTime}</span>
@@ -343,34 +361,41 @@ $(function () {
         const message = $("#messageInput").val().trim();
         const msgType = $("#msgType").val();
 
-        if (!message) return;
+        if (!message && !currentAttachedFile) return;
 
         // Optimistically disable input/send button to prevent double-clicks
         $("#messageInput").prop("disabled", true);
         $("#sendMessageBtn").prop("disabled", true);
+        $("#attachBtn").prop("disabled", true);
 
-        const postData = {
-            message: message,
-            msgType: msgType
-        };
+        const formData = new FormData();
+        formData.append("message", message);
+        formData.append("msgType", msgType);
+        if (currentAttachedFile) {
+            formData.append("image", currentAttachedFile);
+        }
 
         if (selectedContact.isGroup) {
-            postData.groupName = selectedContact.name;
+            formData.append("groupName", selectedContact.name);
         } else {
-            postData["hostId[]"] = [parseInt(selectedContact.id)];
+            formData.append("hostId[]", parseInt(selectedContact.id));
         }
 
         $.ajax({
             url: "/message/api/send",
             method: "POST",
-            data: postData,
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function (res) {
-                // Clear input
+                // Clear input & attachment
                 $("#messageInput").val("").trigger("input");
+                clearAttachment();
                 
                 // Re-enable inputs
                 $("#messageInput").prop("disabled", false).focus();
                 $("#sendMessageBtn").prop("disabled", false);
+                $("#attachBtn").prop("disabled", false);
 
                 // Reload contacts list and chat history
                 loadContacts(selectedContact.id);
@@ -380,17 +405,38 @@ $(function () {
                 alert("Transmission failed. Please check the network or system status.");
                 $("#messageInput").prop("disabled", false);
                 $("#sendMessageBtn").prop("disabled", false);
+                $("#attachBtn").prop("disabled", false);
             }
         });
     }
 
-    // Confirmation action button handler (OK / Cancel)
+    // Confirmation action button handler (OK / Cancel / Custom Message)
     $(document).on("click", ".btn-confirm-action", function (e) {
         e.preventDefault();
         const $btn = $(this);
         const messageId = $btn.data("msg-id");
         const recipientIp = $btn.data("ip");
-        const status = $btn.hasClass("btn-confirm-ok") ? "OK" : "CANCEL";
+        let status = "OK";
+        let replyText = "";
+
+        if ($btn.hasClass("btn-confirm-ok")) {
+            status = "OK";
+            replyText = ""; // OK is clicked -> do nothing extra
+        } else if ($btn.hasClass("btn-confirm-cancel")) {
+            status = "CANCEL";
+            const entered = prompt("Enter reason / message for cancellation (optional):");
+            if (entered === null) {
+                return; // User cancelled the prompt dialog
+            }
+            replyText = entered;
+        } else if ($btn.hasClass("btn-confirm-custom")) {
+            status = "CUSTOM";
+            const entered = prompt("Enter your custom message:");
+            if (entered === null || entered.trim() === "") {
+                return; // User cancelled or entered empty string
+            }
+            replyText = entered;
+        }
 
         $btn.closest(".confirmation-actions").find("button").prop("disabled", true);
 
@@ -400,7 +446,8 @@ $(function () {
             data: {
                 messageId: messageId,
                 recipientIp: recipientIp,
-                status: status
+                status: status,
+                replyText: replyText
             },
             success: function () {
                 window._lastRenderedState = null;
@@ -452,4 +499,85 @@ $(function () {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     }
+
+    // Attachment event handlers
+    $("#attachBtn").on("click", function () {
+        $("#imageFileInput").val("").click();
+    });
+
+    $("#imageFileInput").on("change", function () {
+        if (this.files && this.files[0]) {
+            setAttachment(this.files[0]);
+        }
+    });
+
+    $("#removeImageBtn").on("click", function () {
+        clearAttachment();
+    });
+
+    // Paste from clipboard support (Ctrl + V)
+    $("#messageInput").on("paste", function (e) {
+        const clipboardData = e.originalEvent.clipboardData || window.clipboardData;
+        if (!clipboardData || !clipboardData.items) return;
+
+        for (let i = 0; i < clipboardData.items.length; i++) {
+            const item = clipboardData.items[i];
+            if (item.type && item.type.indexOf("image") !== -1) {
+                const file = item.getAsFile();
+                if (file) {
+                    setAttachment(file);
+                    break;
+                }
+            }
+        }
+    });
+
+    function setAttachment(file) {
+        if (!file.type || !file.type.startsWith("image/")) {
+            alert("Only image files (PNG, JPG, GIF, WebP) are supported.");
+            return;
+        }
+        if (file.size > 25 * 1024 * 1024) {
+            alert("Image size exceeds the 25MB limit.");
+            return;
+        }
+        currentAttachedFile = file;
+        $("#attachBtn").addClass("has-file");
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            $("#imagePreviewImg").attr("src", e.target.result);
+            $("#imagePreviewName").text(file.name || "pasted-image.png");
+            $("#imagePreviewSize").text((file.size / 1024).toFixed(1) + " KB");
+            $("#imagePreviewContainer").slideDown(150);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function clearAttachment() {
+        currentAttachedFile = null;
+        $("#attachBtn").removeClass("has-file");
+        $("#imageFileInput").val("");
+        $("#imagePreviewImg").attr("src", "");
+        $("#imagePreviewContainer").slideUp(150);
+    }
+
+    // Lightbox modal event handlers
+    $(document).on("click", ".message-image", function (e) {
+        e.stopPropagation();
+        const src = $(this).attr("src");
+        $("#lightboxImg").attr("src", src);
+        $("#chatLightbox").fadeIn(150);
+    });
+
+    $("#chatLightbox, #lightboxClose").on("click", function (e) {
+        if (e.target.id === "lightboxImg") return;
+        $("#chatLightbox").fadeOut(150);
+    });
+
+    $(document).on("keydown", function (e) {
+        if (e.key === "Escape" && $("#chatLightbox").is(":visible")) {
+            $("#chatLightbox").fadeOut(150);
+        }
+    });
 });

@@ -398,6 +398,19 @@
             transform: translateY(-1px);
         }
 
+        .btn-confirm-custom {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-confirm-custom:hover {
+            background: rgba(99, 102, 241, 0.4);
+            border-color: #818cf8;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
         .confirmation-status-pill {
             display: inline-flex;
             align-items: center;
@@ -418,6 +431,12 @@
             background: rgba(239, 68, 68, 0.2);
             color: #f87171;
             border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        .confirmation-status-pill.custom {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.4);
         }
 
         .confirmation-status-pill.pending {
@@ -570,6 +589,166 @@
         .char-counter {
             text-align: right;
         }
+
+        /* Attachment & Image Preview Styling */
+        .attachment-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .attachment-btn:hover {
+            background: rgba(99, 102, 241, 0.25);
+            color: #a5b4fc;
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: scale(1.05);
+        }
+
+        .attachment-btn.has-file {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border-color: #10b981;
+        }
+
+        .image-preview-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 8px 14px;
+            border-radius: 12px;
+            margin-bottom: 2px;
+            animation: fadeInMessage 0.2s ease-out;
+        }
+
+        .preview-thumbnail {
+            width: 46px;
+            height: 46px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .preview-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .preview-filename {
+            font-size: 0.85rem;
+            color: #f1f5f9;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .preview-size {
+            font-size: 0.72rem;
+            color: #94a3b8;
+        }
+
+        .btn-remove-preview {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .btn-remove-preview:hover {
+            background: #ef4444;
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        /* Message Bubble Images */
+        .message-image-wrapper {
+            margin: 6px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 320px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .message-image-wrapper:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+        }
+
+        .message-image {
+            width: 100%;
+            max-height: 260px;
+            object-fit: contain;
+            display: block;
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        /* Lightbox modal */
+        .chat-lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(10px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            cursor: zoom-out;
+        }
+
+        .lightbox-content {
+            max-width: 90vw;
+            max-height: 88vh;
+            border-radius: 14px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9);
+            object-fit: contain;
+            cursor: default;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            color: #cbd5e1;
+            font-size: 40px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .lightbox-close:hover {
+            color: #f87171;
+        }
     </style>
 
     <div class="chat-wrapper">
@@ -622,6 +801,18 @@
 
                 <!-- Chat Input footer (Hidden by default) -->
                 <div class="chat-footer" id="chatFooter" style="display: none;">
+                    <!-- Image Preview container -->
+                    <div class="image-preview-container" id="imagePreviewContainer" style="display: none;">
+                        <img id="imagePreviewImg" class="preview-thumbnail" src="" alt="preview" />
+                        <div class="preview-info">
+                            <span id="imagePreviewName" class="preview-filename"></span>
+                            <span id="imagePreviewSize" class="preview-size"></span>
+                        </div>
+                        <button type="button" id="removeImageBtn" class="btn-remove-preview" title="Remove attached image">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+
                     <div class="chat-input-row">
                         <select class="msg-type-select" id="msgType" title="Message Type">
                             <option value="normal">Normal</option>
@@ -629,8 +820,14 @@
                             <option value="docsquad">DocSquad</option>
                             <option value="leave">Leave Portal</option>
                         </select>
+                        
+                        <button type="button" class="attachment-btn" id="attachBtn" title="Attach Image or Screenshot">
+                            <i class="fa-solid fa-paperclip"></i>
+                        </button>
+                        <input type="file" id="imageFileInput" accept="image/*" style="display: none;">
+
                         <div class="chat-input-wrapper">
-                            <textarea class="chat-input" id="messageInput" placeholder="Type a message..." maxlength="500"></textarea>
+                            <textarea class="chat-input" id="messageInput" placeholder="Type a message or paste image (Ctrl+V)..." maxlength="500"></textarea>
                         </div>
                         <button class="send-message-btn" id="sendMessageBtn" title="Transmit">
                             <i class="fa fa-paper-plane"></i>
@@ -645,6 +842,12 @@
         </div>
     </div>
 
+    <!-- Image Lightbox Modal -->
+    <div id="chatLightbox" class="chat-lightbox" style="display: none;">
+        <span class="lightbox-close" id="lightboxClose" title="Close">&times;</span>
+        <img class="lightbox-content" id="lightboxImg" alt="Enlarged transmission">
+    </div>
+
     <!-- Pass current logged-in sender IP and context to JS -->
     <script th:inline="javascript">
         /*<![CDATA[*/
@@ -652,6 +855,6 @@
         const senderName = /*[[${senderName}]]*/ 'Unknown Sender';
         /*]]>*/
     </script>
-    <script th:src="@{/js/msgLander.js(v='2.1')}"></script>
+    <script th:src="@{/js/msgLander.js(v='2.2')}"></script>
 </div>
 </html>

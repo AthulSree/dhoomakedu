@@ -16,6 +16,12 @@ import com.bruhmosuki.dhoomaKedu.dao.chatMessageConfirmationRepository;
 import com.bruhmosuki.dhoomaKedu.entity.chatMessage;
 import com.bruhmosuki.dhoomaKedu.entity.chatMessageConfirmation;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -24,6 +30,15 @@ import java.util.stream.Collectors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.time.LocalDateTime;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Transparency;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.net.NetworkInterface;
+import java.net.InetAddress;
+import java.net.Inet4Address;
+import java.util.Enumeration;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -46,9 +61,33 @@ public class MessageController {
     @Value("${server.callback.url:}")
     private String serverCallbackUrl;
 
-    private String resolveCallbackUrl(HttpServletRequest request) {
+    private String getLocalLanIp() {
+        if (developerMockIp != null && !developerMockIp.trim().isEmpty()) {
+            return developerMockIp.trim();
+        }
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface iface = interfaces.nextElement();
+                if (iface.isLoopback() || !iface.isUp() || iface.isVirtual()) continue;
+                Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (addr instanceof Inet4Address && !addr.isLoopbackAddress() && !addr.isLinkLocalAddress()) {
+                        String ip = addr.getHostAddress();
+                        if (ip != null && !ip.isEmpty() && !ip.startsWith("127.")) {
+                            return ip;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return "10.162.6.11";
+    }
+
+    private String resolveBaseUrl(HttpServletRequest request) {
         if (serverCallbackUrl != null && !serverCallbackUrl.trim().isEmpty()) {
-            return serverCallbackUrl.trim().replaceAll("/+$", "") + "/message/api/confirm";
+            return serverCallbackUrl.trim().replaceAll("/+$", "");
         }
 
         String scheme = request.getScheme();
@@ -61,14 +100,67 @@ public class MessageController {
             hostHeader = request.getHeader("Host");
         }
 
+        String hostPart = null;
         if (hostHeader != null && !hostHeader.trim().isEmpty()) {
-            return scheme + "://" + hostHeader.trim().split(",")[0].trim() + "/message/api/confirm";
+            hostPart = hostHeader.trim().split(",")[0].trim();
+        } else {
+            String serverName = request.getServerName();
+            int serverPort = request.getServerPort();
+            String portPart = (serverPort == 80 || serverPort == 443) ? "" : ":" + serverPort;
+            hostPart = serverName + portPart;
         }
 
-        String serverName = request.getServerName();
-        int serverPort = request.getServerPort();
-        String portPart = (serverPort == 80 || serverPort == 443) ? "" : ":" + serverPort;
-        return scheme + "://" + serverName + portPart + "/message/api/confirm";
+        // When sending to remote machines (like Akhil's), "localhost" or "127.0.0.1" cannot be used
+        // because curl on their PC would try to connect to itself! Substitute the real LAN IP.
+        if (hostPart.startsWith("localhost") || hostPart.startsWith("127.0.0.1") || hostPart.startsWith("0:0:0:0")) {
+            String port = hostPart.contains(":") ? hostPart.substring(hostPart.indexOf(":")) : ":7003";
+            String fallbackIp = getLocalLanIp();
+            hostPart = fallbackIp + port;
+        }
+
+        return scheme + "://" + hostPart;
+    }
+
+    private void saveScaledPreview(File sourceFile, File targetFile, int maxWidth, int maxHeight) {
+        try {
+            BufferedImage original = ImageIO.read(sourceFile);
+            if (original == null) {
+                Files.copy(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                return;
+            }
+
+            int origWidth = original.getWidth();
+            int origHeight = original.getHeight();
+
+            if (origWidth <= maxWidth && origHeight <= maxHeight) {
+                ImageIO.write(original, "png", targetFile);
+                return;
+            }
+
+            double scale = Math.min((double) maxWidth / origWidth, (double) maxHeight / origHeight);
+            int newWidth = Math.max(1, (int) Math.round(origWidth * scale));
+            int newHeight = Math.max(1, (int) Math.round(origHeight * scale));
+
+            int imageType = (original.getTransparency() == Transparency.OPAQUE) ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
+            BufferedImage resized = new BufferedImage(newWidth, newHeight, imageType);
+            Graphics2D g = resized.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.drawImage(original, 0, 0, newWidth, newHeight, null);
+            g.dispose();
+
+            ImageIO.write(resized, "png", targetFile);
+        } catch (Exception e) {
+            System.err.println("Failed to create scaled preview: " + e.getMessage());
+            try {
+                Files.copy(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (Exception ignored) {}
+        }
+    }
+
+    private String resolveCallbackUrl(HttpServletRequest request) {
+        return resolveBaseUrl(request) + "/message/api/confirm";
     }
 
     public MessageController(sshService sshService, groupHostService groupHostService,
@@ -93,8 +185,8 @@ public class MessageController {
             // In case of multiple proxies, the first IP is the client
             clientIp = clientIp.split(",")[0].trim();
         }
-        if ("0:0:0:0:0:0:0:1".equals(clientIp)) {
-            clientIp = developerMockIp;
+        if ("0:0:0:0:0:0:0:1".equals(clientIp) || "127.0.0.1".equals(clientIp)) {
+            clientIp = getLocalLanIp();
         }
 
         employee sender = employeeService.findBySysIp(clientIp);
@@ -121,8 +213,8 @@ public class MessageController {
             // In case of multiple proxies, the first IP is the client
             clientIp = clientIp.split(",")[0].trim();
         }
-        if ("0:0:0:0:0:0:0:1".equals(clientIp)) {
-            clientIp = developerMockIp;
+        if ("0:0:0:0:0:0:0:1".equals(clientIp) || "127.0.0.1".equals(clientIp)) {
+            clientIp = getLocalLanIp();
         }
 
         employee sender = employeeService.findBySysIp(clientIp);
@@ -198,19 +290,9 @@ public class MessageController {
                 command = "export DISPLAY=:0; " +
                         "nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
             } else if ("confirm".equals(msgType)) {
-                //------ Confirmation message (OK / Cancel) ------ 
+                //------ Confirmation message (OK / Cancel / Custom Message) ------ 
                 String callbackUrl = resolveCallbackUrl(request);
-                String dialogFlow = "if zenity --question " +
-                        "--title='🕊️ Doothan Confirmation' " +
-                        "--ok-label='OK' --cancel-label='Cancel' " +
-                        "--text=" + shellQuote(fullMessage) + "; then " +
-                        "  STATUS='OK'; " +
-                        "else " +
-                        "  STATUS='CANCEL'; " +
-                        "fi; " +
-                        "curl -s --connect-timeout 5 --max-time 10 -X POST " + shellQuote(callbackUrl) + " " +
-                        "-d 'messageId=" + savedMsg.getId() + "&recipientIp=" + hostIp + "&status='\"$STATUS\" >/dev/null 2>&1";
-
+                String dialogFlow = buildConfirmDialogFlow(fullMessage, callbackUrl, savedMsg.getId(), hostIp);
                 command = "export DISPLAY=:0; " +
                         "nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
             } else {
@@ -268,8 +350,8 @@ public class MessageController {
         } else {
             clientIp = clientIp.split(",")[0].trim();
         }
-        if ("0:0:0:0:0:0:0:1".equals(clientIp)) {
-            clientIp = developerMockIp;
+        if ("0:0:0:0:0:0:0:1".equals(clientIp) || "127.0.0.1".equals(clientIp)) {
+            clientIp = getLocalLanIp();
         }
         return clientIp;
     }
@@ -292,7 +374,7 @@ public class MessageController {
         String[] groupNames = {"MPR", "Spill Tea", "Crex"};
         String[] groupIds = {"group_mpr", "group_tea", "group_crex"};
         String[][] groupMembers = {
-            {"1", "2", "3", "5", "6", "7", "8", "9", "10", "12"},
+            {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "12", "13"},
             {"1", "2", "3", "4", "9"},
             {"3"}
         };
@@ -374,13 +456,23 @@ public class MessageController {
     public ResponseEntity<Map<String, Object>> sendMsgApi(
             @RequestParam(value = "hostId[]", required = false) List<Integer> hostIds,
             @RequestParam(value = "groupName", required = false) String groupName,
-            @RequestParam("message") String message,
+            @RequestParam(value = "message", required = false, defaultValue = "") String message,
             @RequestParam(value = "msgType", defaultValue = "normal") String msgType,
+            @RequestParam(value = "image", required = false) MultipartFile imageFile,
             HttpServletRequest request) {
 
         String clientIp = getClientIp(request);
         String senderName = getSenderName(clientIp);
         Map<String, Object> response = new HashMap<>();
+
+        boolean hasText = message != null && !message.trim().isEmpty();
+        boolean hasImage = imageFile != null && !imageFile.isEmpty();
+
+        if (!hasText && !hasImage) {
+            response.put("success", false);
+            response.put("error", "Message content or image attachment is required");
+            return ResponseEntity.badRequest().body(response);
+        }
 
         List<groupHost> recipients = new ArrayList<>();
         if (groupName != null && !groupName.isEmpty()) {
@@ -421,7 +513,46 @@ public class MessageController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        String fullMessage = message + "\n\n\nRegards,\n" + senderName + "\n[Nēnu nīke Dūtanu]";
+        String attachmentUrl = null;
+        String previewAttachmentUrl = null;
+        if (hasImage) {
+            try {
+                String originalFilename = imageFile.getOriginalFilename();
+                String ext = ".png";
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    String extractedExt = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
+                    if (extractedExt.matches("^\\.(png|jpg|jpeg|gif|webp|bmp|svg)$")) {
+                        ext = extractedExt;
+                    }
+                }
+                String subDir = "chat-images";
+                String uploadDirPath = Paths.get(System.getProperty("user.dir"), "uploads", subDir).toAbsolutePath().toString();
+                File uploadFolder = new File(uploadDirPath);
+                if (!uploadFolder.exists()) {
+                    uploadFolder.mkdirs();
+                }
+
+                String baseUuid = UUID.randomUUID().toString();
+                String filename = baseUuid + ext;
+                File targetFile = new File(uploadFolder, filename);
+                imageFile.transferTo(targetFile);
+                attachmentUrl = "/uploads/" + subDir + "/" + filename;
+
+                // Create a scaled preview for desktop notification popups (max 460x320 px)
+                String previewFilename = "prev_" + baseUuid + ".png";
+                File previewFile = new File(uploadFolder, previewFilename);
+                saveScaledPreview(targetFile, previewFile, 460, 320);
+                previewAttachmentUrl = "/uploads/" + subDir + "/" + previewFilename;
+            } catch (Exception e) {
+                System.err.println("Failed to save chat image: " + e.getMessage());
+                response.put("success", false);
+                response.put("error", "Failed to upload image: " + e.getMessage());
+                return ResponseEntity.internalServerError().body(response);
+            }
+        }
+
+        String contentText = hasText ? message.trim() : "";
+        String fullMessage = (contentText.isEmpty() ? "" : contentText + "\n\n\n") + "Regards,\n" + senderName + "\n[Nēnu nīke Dūtanu]";
 
         Map<String, Long> recipientMsgIdMap = new HashMap<>();
         LocalDateTime now = LocalDateTime.now();
@@ -432,9 +563,10 @@ public class MessageController {
                 senderName,
                 null,
                 groupName + " Broadcast",
-                message,
+                contentText,
                 msgType,
                 groupName,
+                attachmentUrl,
                 now
             );
             chatMessage savedMsg = chatMessageRepository.save(chatMsg);
@@ -459,9 +591,10 @@ public class MessageController {
                     senderName,
                     gh.getHost(),
                     gh.getUserName(),
-                    message,
+                    contentText,
                     msgType,
                     null,
+                    attachmentUrl,
                     now
                 );
                 chatMessage savedMsg = chatMessageRepository.save(chatMsg);
@@ -480,7 +613,10 @@ public class MessageController {
             }
         }
 
-        String callbackUrl = resolveCallbackUrl(request);
+        String baseUrl = resolveBaseUrl(request);
+        String callbackUrl = baseUrl + "/message/api/confirm";
+        final String finalAttachmentUrl = attachmentUrl;
+        final String finalPreviewUrl = (previewAttachmentUrl != null) ? previewAttachmentUrl : attachmentUrl;
 
         for (groupHost gh : recipients) {
             String hostIp = gh.getHost();
@@ -493,16 +629,79 @@ public class MessageController {
                 if ("docsquad".equals(msgType)) {
                     String url = "http://10.162.6.180:8015/docsquad/";
                     String text = fullMessage + "\n\nLink: " + url;
-                    String dialogFlow = "if zenity --question --title='Doothan Incoming...' --ok-label='Open the byte-WhaSSH 2.0 / DocsQuad' --cancel-label='Close' --text=" + shellQuote(text) + "; then xdg-open " + shellQuote(url) + " >/dev/null 2>&1; fi";
-                    command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+                    if (finalAttachmentUrl != null && !finalAttachmentUrl.isEmpty()) {
+                        String fullImageUrl = baseUrl + finalAttachmentUrl;
+                        String previewImageUrl = baseUrl + finalPreviewUrl;
+                        String dialogFlow = "IMG_FILE=\"/tmp/doothan_$(date +%s%N).png\"; " +
+                                "curl -s -f --connect-timeout 5 --max-time 15 " + shellQuote(previewImageUrl) + " -o \"$IMG_FILE\"; " +
+                                "if which yad >/dev/null 2>&1 && [ -s \"$IMG_FILE\" ]; then " +
+                                "  yad --title='Doothan: DocsQuad' --image=\"$IMG_FILE\" --image-on-top --center " +
+                                "      --text=" + shellQuote(text) + " " +
+                                "      --button='Open DocsQuad:0' --button='🖼️ Full Size:2' --button='Close:1'; " +
+                                "  RES=$?; " +
+                                "  if [ $RES -eq 0 ]; then xdg-open " + shellQuote(url) + " >/dev/null 2>&1; fi; " +
+                                "  if [ $RES -eq 2 ]; then xdg-open " + shellQuote(fullImageUrl) + " >/dev/null 2>&1; fi; " +
+                                "else " +
+                                "  if zenity --question --title='Doothan Incoming...' --ok-label='Open the byte-WhaSSH 2.0 / DocsQuad' --cancel-label='Close' --text=" + shellQuote(text) + "; then " +
+                                "    xdg-open " + shellQuote(url) + " >/dev/null 2>&1; " +
+                                "  fi; " +
+                                "fi; " +
+                                "(sleep 120 && rm -f \"$IMG_FILE\") >/dev/null 2>&1 &";
+                        command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+                    } else {
+                        String dialogFlow = "if zenity --question --title='Doothan Incoming...' --ok-label='Open the byte-WhaSSH 2.0 / DocsQuad' --cancel-label='Close' --text=" + shellQuote(text) + "; then xdg-open " + shellQuote(url) + " >/dev/null 2>&1; fi";
+                        command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+                    }
                 } else if ("leave".equals(msgType)) {
                     String url = "http://10.162.6.188:7003/leaves/manage";
                     String text = fullMessage + "\n\nLink: " + url;
-                    String dialogFlow = "if zenity --question --title='Doothan Incoming...' --ok-label='Open Leave Portal' --cancel-label='Close' --text=" + shellQuote(text) + "; then xdg-open " + shellQuote(url) + " >/dev/null 2>&1; fi";
-                    command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+                    if (finalAttachmentUrl != null && !finalAttachmentUrl.isEmpty()) {
+                        String fullImageUrl = baseUrl + finalAttachmentUrl;
+                        String previewImageUrl = baseUrl + finalPreviewUrl;
+                        String dialogFlow = "IMG_FILE=\"/tmp/doothan_$(date +%s%N).png\"; " +
+                                "curl -s -f --connect-timeout 5 --max-time 15 " + shellQuote(previewImageUrl) + " -o \"$IMG_FILE\"; " +
+                                "if which yad >/dev/null 2>&1 && [ -s \"$IMG_FILE\" ]; then " +
+                                "  yad --title='Doothan: Leave Portal' --image=\"$IMG_FILE\" --image-on-top --center " +
+                                "      --text=" + shellQuote(text) + " " +
+                                "      --button='Open Leave Portal:0' --button='🖼️ Full Size:2' --button='Close:1'; " +
+                                "  RES=$?; " +
+                                "  if [ $RES -eq 0 ]; then xdg-open " + shellQuote(url) + " >/dev/null 2>&1; fi; " +
+                                "  if [ $RES -eq 2 ]; then xdg-open " + shellQuote(fullImageUrl) + " >/dev/null 2>&1; fi; " +
+                                "else " +
+                                "  if zenity --question --title='Doothan Incoming...' --ok-label='Open Leave Portal' --cancel-label='Close' --text=" + shellQuote(text) + "; then " +
+                                "    xdg-open " + shellQuote(url) + " >/dev/null 2>&1; " +
+                                "  fi; " +
+                                "fi; " +
+                                "(sleep 120 && rm -f \"$IMG_FILE\") >/dev/null 2>&1 &";
+                        command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+                    } else {
+                        String dialogFlow = "if zenity --question --title='Doothan Incoming...' --ok-label='Open Leave Portal' --cancel-label='Close' --text=" + shellQuote(text) + "; then xdg-open " + shellQuote(url) + " >/dev/null 2>&1; fi";
+                        command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+                    }
                 } else if ("confirm".equals(msgType)) {
-                    String dialogFlow = "if zenity --question --title='🕊️ Doothan Confirmation' --ok-label='OK' --cancel-label='Cancel' --text=" + shellQuote(fullMessage) + "; then STATUS='OK'; else STATUS='CANCEL'; fi; " +
-                            "curl -s --connect-timeout 5 --max-time 10 -X POST " + shellQuote(callbackUrl) + " -d 'messageId=" + targetMsgId + "&recipientIp=" + hostIp + "&status='\"$STATUS\" >/dev/null 2>&1";
+                    String fullImageUrl = (finalAttachmentUrl != null && !finalAttachmentUrl.isEmpty()) ? (baseUrl + finalAttachmentUrl) : null;
+                    String previewImageUrl = (finalPreviewUrl != null && !finalPreviewUrl.isEmpty()) ? (baseUrl + finalPreviewUrl) : null;
+                    String dialogFlow = buildConfirmDialogFlow(fullMessage, callbackUrl, targetMsgId, hostIp, previewImageUrl, fullImageUrl);
+                    command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
+                } else if (finalAttachmentUrl != null && !finalAttachmentUrl.isEmpty()) {
+                    String fullImageUrl = baseUrl + finalAttachmentUrl;
+                    String previewImageUrl = baseUrl + finalPreviewUrl;
+                    String dialogFlow = "IMG_FILE=\"/tmp/doothan_$(date +%s%N).png\"; " +
+                            "curl -s -f --connect-timeout 5 --max-time 15 " + shellQuote(previewImageUrl) + " -o \"$IMG_FILE\"; " +
+                            "if which yad >/dev/null 2>&1 && [ -s \"$IMG_FILE\" ]; then " +
+                            "  yad --title='🕊️ Doothan: Image Incoming...' " +
+                            "      --image=\"$IMG_FILE\" --image-on-top --center " +
+                            "      --text=" + shellQuote(fullMessage) + " " +
+                            "      --button='Close:0' --button='🖼️ Full Size:2'; " +
+                            "  if [ $? -eq 2 ]; then xdg-open " + shellQuote(fullImageUrl) + " >/dev/null 2>&1; fi; " +
+                            "else " +
+                            "  if zenity --question --title='🕊️ Doothan: Image Incoming...' " +
+                            "            --ok-label='🖼️ View Image' --cancel-label='Close' " +
+                            "            --text=" + shellQuote(fullMessage + "\n\n📷 [Image Attached - Click 'View Image' to open]") + "; then " +
+                            "    xdg-open " + shellQuote(fullImageUrl) + " >/dev/null 2>&1; " +
+                            "  fi; " +
+                            "fi; " +
+                            "(sleep 120 && rm -f \"$IMG_FILE\") >/dev/null 2>&1 &";
                     command = "export DISPLAY=:0; nohup bash -lc " + shellQuote(dialogFlow) + " >/dev/null 2>&1 &";
                 } else {
                     command = "export DISPLAY=:0; nohup zenity --info --title='\uD83D\uDD4A\uFE0F Doothan Incoming...' --text=\"" + fullMessage + "\" > /dev/null 2>&1 &";
@@ -513,6 +712,7 @@ public class MessageController {
         }
 
         response.put("success", true);
+        response.put("attachmentUrl", attachmentUrl);
         response.put("timestamp", now.toString());
         return ResponseEntity.ok(response);
     }
@@ -523,6 +723,7 @@ public class MessageController {
             @RequestParam("messageId") Long messageId,
             @RequestParam(value = "recipientIp", required = false) String recipientIp,
             @RequestParam("status") String status,
+            @RequestParam(value = "replyText", required = false) String replyText,
             HttpServletRequest request) {
 
         Map<String, Object> response = new HashMap<>();
@@ -531,13 +732,20 @@ public class MessageController {
             recipientIp = getClientIp(request);
         }
 
-        String normalizedStatus = "OK".equalsIgnoreCase(status) ? "OK" : "CANCEL";
+        String normalizedStatus = "OK";
+        if ("CANCEL".equalsIgnoreCase(status)) {
+            normalizedStatus = "CANCEL";
+        } else if ("CUSTOM".equalsIgnoreCase(status)) {
+            normalizedStatus = "CUSTOM";
+        }
+
         List<chatMessageConfirmation> confs = confirmationRepository.findByMessageId(messageId);
         boolean updated = false;
 
         for (chatMessageConfirmation conf : confs) {
             if (recipientIp.equals(conf.getRecipientIp()) || confs.size() == 1) {
                 conf.setStatus(normalizedStatus);
+                conf.setReplyText(replyText);
                 conf.setRespondedAt(LocalDateTime.now());
                 confirmationRepository.save(conf);
                 updated = true;
@@ -549,6 +757,7 @@ public class MessageController {
             for (chatMessageConfirmation conf : confs) {
                 if ("PENDING".equals(conf.getStatus())) {
                     conf.setStatus(normalizedStatus);
+                    conf.setReplyText(replyText);
                     conf.setRespondedAt(LocalDateTime.now());
                     confirmationRepository.save(conf);
                     updated = true;
@@ -559,7 +768,102 @@ public class MessageController {
 
         response.put("success", updated);
         response.put("status", normalizedStatus);
+        response.put("replyText", replyText);
         return ResponseEntity.ok(response);
+    }
+
+    private String buildConfirmDialogFlow(String fullMessage, String callbackUrl, Long messageId, String hostIp) {
+        return buildConfirmDialogFlow(fullMessage, callbackUrl, messageId, hostIp, null, null);
+    }
+
+    private String buildConfirmDialogFlow(String fullMessage, String callbackUrl, Long messageId, String hostIp, String previewImageUrl, String fullImageUrl) {
+        if (previewImageUrl != null && !previewImageUrl.isEmpty()) {
+            return "IMG_FILE=\"/tmp/doothan_$(date +%s%N).png\"; " +
+                    "curl -s -f --connect-timeout 5 --max-time 15 " + shellQuote(previewImageUrl) + " -o \"$IMG_FILE\"; " +
+                    "if which yad >/dev/null 2>&1 && [ -s \"$IMG_FILE\" ]; then " +
+                    "  while true; do " +
+                    "    yad --title='🕊️ Doothan Confirmation' " +
+                    "        --image=\"$IMG_FILE\" --image-on-top --center " +
+                    "        --text=" + shellQuote(fullMessage) + " " +
+                    "        --button='🖼️ Full Size:3' --button='OK:0' --button='Cancel:1' --button='Custom Message:2'; " +
+                    "    CODE=$?; " +
+                    "    if [ $CODE -eq 3 ]; then xdg-open " + shellQuote(fullImageUrl) + " >/dev/null 2>&1; continue; fi; " +
+                    "    break; " +
+                    "  done; " +
+                    "  STATUS='OK'; REPLY=''; " +
+                    "  if [ $CODE -eq 2 ]; then " +
+                    "    STATUS='CUSTOM'; " +
+                    "    REPLY=$(zenity --entry --title='🕊️ Doothan Custom Message' --text='Enter your custom message:' --width=350); " +
+                    "  elif [ $CODE -ne 0 ]; then " +
+                    "    STATUS='CANCEL'; " +
+                    "    REPLY=$(zenity --entry --title='🕊️ Doothan Cancel Reason' --text='Enter reason / custom message:' --width=350); " +
+                    "  else " +
+                    "    STATUS='OK'; REPLY=''; " +
+                    "  fi; " +
+                    "else " +
+                    "  while true; do " +
+                    "    BTN=$(zenity --question --title='🕊️ Doothan Confirmation' " +
+                    "          --ok-label='OK' --cancel-label='Cancel' --extra-button='Custom Message' --extra-button='🖼️ View Image' " +
+                    "          --text=" + shellQuote(fullMessage + "\n\n📷 [Image Attached - Click 'View Image' to open]") + "); " +
+                    "    CODE=$?; " +
+                    "    if [ \"$BTN\" = \"🖼️ View Image\" ]; then xdg-open " + shellQuote(fullImageUrl) + " >/dev/null 2>&1; continue; fi; " +
+                    "    break; " +
+                    "  done; " +
+                    "  STATUS='OK'; REPLY=''; " +
+                    "  if [ \"$BTN\" = \"Custom Message\" ]; then " +
+                    "    STATUS='CUSTOM'; " +
+                    "    REPLY=$(zenity --entry --title='🕊️ Doothan Custom Message' --text='Enter your custom message:' --width=350); " +
+                    "  elif [ $CODE -ne 0 ]; then " +
+                    "    STATUS='CANCEL'; " +
+                    "    REPLY=$(zenity --entry --title='🕊️ Doothan Cancel Reason' --text='Enter reason / custom message:' --width=350); " +
+                    "  else " +
+                    "    STATUS='OK'; REPLY=''; " +
+                    "  fi; " +
+                    "fi; " +
+                    "(sleep 120 && rm -f \"$IMG_FILE\") >/dev/null 2>&1 & " +
+                    "curl -s --connect-timeout 5 --max-time 10 -X POST " + shellQuote(callbackUrl) + " " +
+                    "--data-urlencode \"messageId=" + messageId + "\" " +
+                    "--data-urlencode \"recipientIp=" + hostIp + "\" " +
+                    "--data-urlencode \"status=$STATUS\" " +
+                    "--data-urlencode \"replyText=$REPLY\" >/dev/null 2>&1";
+        }
+
+        return "if which yad >/dev/null 2>&1; then " +
+                "  yad --title='🕊️ Doothan Confirmation' --center " +
+                "      --text=" + shellQuote(fullMessage) + " " +
+                "      --button='OK:0' --button='Cancel:1' --button='Custom Message:2'; " +
+                "  CODE=$?; " +
+                "  STATUS='OK'; REPLY=''; " +
+                "  if [ $CODE -eq 2 ]; then " +
+                "    STATUS='CUSTOM'; " +
+                "    REPLY=$(zenity --entry --title='🕊️ Doothan Custom Message' --text='Enter your custom message:' --width=350); " +
+                "  elif [ $CODE -ne 0 ]; then " +
+                "    STATUS='CANCEL'; " +
+                "    REPLY=$(zenity --entry --title='🕊️ Doothan Cancel Reason' --text='Enter reason / custom message:' --width=350); " +
+                "  else " +
+                "    STATUS='OK'; REPLY=''; " +
+                "  fi; " +
+                "else " +
+                "  BTN=$(zenity --question --title='🕊️ Doothan Confirmation' " +
+                "        --ok-label='OK' --cancel-label='Cancel' --extra-button='Custom Message' " +
+                "        --text=" + shellQuote(fullMessage) + "); " +
+                "  CODE=$?; " +
+                "  STATUS='OK'; REPLY=''; " +
+                "  if [ \"$BTN\" = \"Custom Message\" ]; then " +
+                "    STATUS='CUSTOM'; " +
+                "    REPLY=$(zenity --entry --title='🕊️ Doothan Custom Message' --text='Enter your custom message:' --width=350); " +
+                "  elif [ $CODE -ne 0 ]; then " +
+                "    STATUS='CANCEL'; " +
+                "    REPLY=$(zenity --entry --title='🕊️ Doothan Cancel Reason' --text='Enter reason / custom message:' --width=350); " +
+                "  else " +
+                "    STATUS='OK'; REPLY=''; " +
+                "  fi; " +
+                "fi; " +
+                "curl -s --connect-timeout 5 --max-time 10 -X POST " + shellQuote(callbackUrl) + " " +
+                "--data-urlencode \"messageId=" + messageId + "\" " +
+                "--data-urlencode \"recipientIp=" + hostIp + "\" " +
+                "--data-urlencode \"status=$STATUS\" " +
+                "--data-urlencode \"replyText=$REPLY\" >/dev/null 2>&1";
     }
 
     private static String shellQuote(String s) {

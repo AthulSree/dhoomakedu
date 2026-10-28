@@ -21,7 +21,10 @@ public class chatMessageConfirmation {
     private String recipientName;
 
     @Column(name = "status", nullable = false, length = 20)
-    private String status; // "PENDING", "OK", "CANCEL"
+    private String status; // "PENDING", "OK", "CANCEL", "CUSTOM"
+
+    @Column(name = "reply_text", length = 500)
+    private String replyText;
 
     @Column(name = "responded_at")
     private LocalDateTime respondedAt;
@@ -34,6 +37,15 @@ public class chatMessageConfirmation {
         this.recipientIp = recipientIp;
         this.recipientName = recipientName;
         this.status = status;
+        this.respondedAt = respondedAt;
+    }
+
+    public chatMessageConfirmation(Long messageId, String recipientIp, String recipientName, String status, String replyText, LocalDateTime respondedAt) {
+        this.messageId = messageId;
+        this.recipientIp = recipientIp;
+        this.recipientName = recipientName;
+        this.status = status;
+        this.replyText = replyText;
         this.respondedAt = respondedAt;
     }
 
@@ -83,6 +95,14 @@ public class chatMessageConfirmation {
 
     public void setRespondedAt(LocalDateTime respondedAt) {
         this.respondedAt = respondedAt;
+    }
+
+    public String getReplyText() {
+        return replyText;
+    }
+
+    public void setReplyText(String replyText) {
+        this.replyText = replyText;
     }
 
     @Override
