@@ -5,6 +5,72 @@ $(function () {
     let lastContactsStateString = "";
     let currentAttachedFile = null;
 
+    function normalizeAttachmentUrl(url) {
+        if (!url) return '';
+        if (url.startsWith('/uploads/')) {
+            return '/message' + url;
+        }
+        return url;
+    }
+
+    function optimizeImageBeforeUpload(file, callback) {
+        if (!file) {
+            callback(null);
+            return;
+        }
+        // If file is under 750 KB or is GIF/SVG, send as-is
+        if (file.size <= 750 * 1024 || file.type === 'image/gif' || file.type === 'image/svg+xml') {
+            callback(file);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const img = new Image();
+            img.onload = function () {
+                let width = img.width;
+                let height = img.height;
+                const maxDim = 1600;
+                if (width > maxDim || height > maxDim) {
+                    if (width > height) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+                }
+
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob(function (blob) {
+                    if (blob && blob.size < file.size) {
+                        const newName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+                        const optimizedFile = new File([blob], newName, {
+                            type: "image/jpeg",
+                            lastModified: Date.now()
+                        });
+                        callback(optimizedFile);
+                    } else {
+                        callback(file);
+                    }
+                }, "image/jpeg", 0.82);
+            };
+            img.onerror = function () {
+                callback(file);
+            };
+            img.src = e.target.result;
+        };
+        reader.onerror = function () {
+            callback(file);
+        };
+        reader.readAsDataURL(file);
+    }
+
     // Load contacts initially
     loadContacts();
 
@@ -321,72 +387,6 @@ $(function () {
                 }
             }
 
-    function normalizeAttachmentUrl(url) {
-        if (!url) return '';
-        if (url.startsWith('/uploads/')) {
-            return '/message' + url;
-        }
-        return url;
-    }
-
-    function optimizeImageBeforeUpload(file, callback) {
-        if (!file) {
-            callback(null);
-            return;
-        }
-        // If file is under 750 KB or is GIF/SVG, send as-is
-        if (file.size <= 750 * 1024 || file.type === 'image/gif' || file.type === 'image/svg+xml') {
-            callback(file);
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const img = new Image();
-            img.onload = function () {
-                let width = img.width;
-                let height = img.height;
-                const maxDim = 1600;
-                if (width > maxDim || height > maxDim) {
-                    if (width > height) {
-                        height = Math.round((height * maxDim) / width);
-                        width = maxDim;
-                    } else {
-                        width = Math.round((width * maxDim) / height);
-                        height = maxDim;
-                    }
-                }
-
-                const canvas = document.createElement("canvas");
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0, width, height);
-
-                canvas.toBlob(function (blob) {
-                    if (blob && blob.size < file.size) {
-                        const newName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
-                        const optimizedFile = new File([blob], newName, {
-                            type: "image/jpeg",
-                            lastModified: Date.now()
-                        });
-                        callback(optimizedFile);
-                    } else {
-                        callback(file);
-                    }
-                }, "image/jpeg", 0.82);
-            };
-            img.onerror = function () {
-                callback(file);
-            };
-            img.src = e.target.result;
-        };
-        reader.onerror = function () {
-            callback(file);
-        };
-        reader.readAsDataURL(file);
-    }
-
             let imageHtml = '';
             if (msg.attachmentUrl) {
                 const imgUrl = normalizeAttachmentUrl(msg.attachmentUrl);
@@ -435,7 +435,7 @@ $(function () {
         $("#sendMessageBtn").prop("disabled", true);
         $("#attachBtn").prop("disabled", true);
 
-        optimizeImageBeforeUpload(currentAttachedFile, function (fileToSend) {
+        const sendPayload = function (fileToSend) {
             const formData = new FormData();
             formData.append("message", message);
             formData.append("msgType", msgType);
@@ -484,7 +484,13 @@ $(function () {
                     $("#attachBtn").prop("disabled", false);
                 }
             });
-        });
+        };
+
+        if (currentAttachedFile) {
+            optimizeImageBeforeUpload(currentAttachedFile, sendPayload);
+        } else {
+            sendPayload(null);
+        }
     }
 
     // Confirmation action button handler (OK / Cancel / Custom Message)
