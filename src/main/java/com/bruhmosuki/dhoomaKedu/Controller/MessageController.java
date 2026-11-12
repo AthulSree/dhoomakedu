@@ -375,7 +375,7 @@ public class MessageController {
         String[] groupNames = {"MPR", "Spill Tea", "Crex"};
         String[] groupIds = {"group_mpr", "group_tea", "group_crex"};
         String[][] groupMembers = {
-            {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "12", "13"},
+            {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "13"},
             {"1", "2", "3", "4", "9"},
             {"3"}
         };

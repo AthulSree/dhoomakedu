@@ -6,6 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Entity
@@ -155,6 +156,37 @@ public class workorder {
 
     public void setUpdatedTime(LocalDateTime updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    @Transient
+    public Long getDaysLeft() {
+        if (this.woToDate == null) {
+            return null;
+        }
+        return ChronoUnit.DAYS.between(LocalDate.now(), this.woToDate);
+    }
+
+    @Transient
+    public String getExpiryStatus() {
+        Long days = getDaysLeft();
+        if (days == null) {
+            return "UNKNOWN";
+        }
+        if (days < 0) {
+            return "EXPIRED";
+        } else if (days <= 30) {
+            return "CRITICAL";
+        } else if (days <= 60) {
+            return "WARNING";
+        } else {
+            return "OK";
+        }
+    }
+
+    @Transient
+    public boolean isExpired() {
+        Long days = getDaysLeft();
+        return days != null && days < 0;
     }
 
     @Override

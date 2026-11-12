@@ -342,12 +342,220 @@
             background: rgba(96, 165, 250, 0.1);
             color: var(--accent-blue);
         }
+
+        /* ── Status Pills & Badges ── */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .pill i { font-size: 0.7rem; }
+        .pill-ok       { background: rgba(20,220,120,0.15); color: #50e8a0; border: 1px solid rgba(20,220,120,0.3); }
+        .pill-expired  { background: rgba(255,60,60,0.14);  color: #f87171; border: 1px solid rgba(255,60,60,0.3); }
+        .pill-critical { background: rgba(255,100,30,0.14); color: #fb923c; border: 1px solid rgba(255,100,30,0.3); }
+        .pill-warning  { background: rgba(255,200,0,0.12);  color: #facc15; border: 1px solid rgba(255,200,0,0.3); }
+        .pill-unknown  { background: rgba(255,255,255,0.06); color: var(--text-secondary); border: 1px solid var(--glass-border); }
+
+        .status-sub {
+            font-size: 0.7rem;
+            margin-top: 3px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .sub-exp  { color: #f87171; }
+        .sub-crit { color: #fb923c; }
+        .sub-warn { color: #facc15; }
+        .sub-ok   { color: #94a3b8; }
+
+        .badge-you {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.25), rgba(59, 130, 246, 0.35));
+            border: 1px solid rgba(96, 165, 250, 0.5);
+            color: #93c5fd;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.35rem;
+            margin-left: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            vertical-align: middle;
+        }
+
+        .modern-table tr.row-expired td {
+            background: rgba(239, 68, 68, 0.04);
+        }
+        .modern-table tr.row-expired:hover td {
+            background: rgba(239, 68, 68, 0.08);
+        }
+        .modern-table tr.row-you td {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        /* ── Header User Status Banner ── */
+        .user-wo-status-banner {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-top: 0.4rem;
+            padding: 0.3rem 0.85rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            font-size: 0.78rem;
+        }
+        .user-wo-label {
+            color: var(--text-secondary);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-weight: 500;
+        }
+        .user-wo-label i { color: var(--accent-blue); }
+        .user-wo-action {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.74rem;
+            margin-left: 0.25rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.35rem;
+            background: rgba(96, 165, 250, 0.12);
+            transition: all 0.2s;
+        }
+        .user-wo-action:hover {
+            background: rgba(96, 165, 250, 0.25);
+            color: #fff;
+        }
+
+        /* ── Table Filter Bar ── */
+        .wo-filter-bar {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.73rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .filter-pill:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+        }
+        .filter-pill strong {
+            margin-left: 0.15rem;
+            font-size: 0.72rem;
+            padding: 0.05rem 0.35rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .filter-pill.active {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .filter-pill[data-filter="all"].active {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .filter-pill.filter-exp { color: #f87171; border-color: rgba(248, 113, 113, 0.25); }
+        .filter-pill.filter-exp.active, .filter-pill.filter-exp:hover {
+            background: rgba(255, 60, 60, 0.18);
+            border-color: rgba(255, 60, 60, 0.45);
+            color: #fca5a5;
+        }
+        .filter-pill.filter-crit { color: #fb923c; border-color: rgba(251, 146, 60, 0.25); }
+        .filter-pill.filter-crit.active, .filter-pill.filter-crit:hover {
+            background: rgba(255, 100, 30, 0.18);
+            border-color: rgba(255, 100, 30, 0.45);
+            color: #fdba74;
+        }
+        .filter-pill.filter-warn { color: #facc15; border-color: rgba(250, 204, 21, 0.25); }
+        .filter-pill.filter-warn.active, .filter-pill.filter-warn:hover {
+            background: rgba(255, 200, 0, 0.16);
+            border-color: rgba(255, 200, 0, 0.4);
+            color: #fde047;
+        }
+        .filter-pill.filter-ok { color: #50e8a0; border-color: rgba(80, 232, 160, 0.25); }
+        .filter-pill.filter-ok.active, .filter-pill.filter-ok:hover {
+            background: rgba(20, 220, 120, 0.16);
+            border-color: rgba(20, 220, 120, 0.4);
+            color: #6ee7b7;
+        }
+
+        /* ── Form Expiry Banner & Feedback ── */
+        .form-expiry-banner {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.7rem 0.9rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.82rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .form-expiry-banner .banner-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .form-expiry-banner .banner-title {
+            font-weight: 600;
+        }
+        .form-expiry-banner .banner-sub {
+            font-size: 0.74rem;
+            opacity: 0.85;
+            margin-top: 1px;
+        }
+        .banner-expired  { background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; }
+        .banner-expired .banner-icon { color: #f87171; }
+        .banner-critical { background: rgba(249, 115, 22, 0.14); border: 1px solid rgba(249, 115, 22, 0.35); color: #fdba74; }
+        .banner-critical .banner-icon { color: #fb923c; }
+        .banner-warning  { background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.3); color: #fde047; }
+        .banner-warning .banner-icon { color: #facc15; }
+        .banner-ok       { background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); color: #6ee7b7; }
+        .banner-ok .banner-icon { color: #34d399; }
+
+        .date-feedback {
+            font-size: 0.75rem;
+            margin-top: 0.35rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
     </style>
 
     <div class="page-wrapper">
         <header class="header-section">
             <h1 class="header-title">Work Order Management</h1>
-            <p style="color: var(--text-secondary)">Assign and track employee contracts & work cycles</p>
+            <p style="color: var(--text-secondary); margin-bottom: 0.35rem;">Assign and track employee contracts & work cycles</p>
+            <div th:if="${loggedUserWo != null and loggedUserWo.woToDate != null}" class="user-wo-status-banner">
+                <span class="user-wo-label"><i class="fa-solid fa-user-shield"></i> Your Work Order (<span th:text="${loggedUser.first_name}">User</span>):</span>
+                <span th:if="${loggedUserWo.expiryStatus == 'EXPIRED'}" class="pill pill-expired"><i class="fa-solid fa-circle-xmark"></i> Expired (<span th:text="${-loggedUserWo.daysLeft} + 'd ago'"></span>)</span>
+                <span th:if="${loggedUserWo.expiryStatus == 'CRITICAL'}" class="pill pill-critical"><i class="fa-solid fa-fire"></i> Critical (<span th:text="${loggedUserWo.daysLeft} + 'd left'"></span>)</span>
+                <span th:if="${loggedUserWo.expiryStatus == 'WARNING'}" class="pill pill-warning"><i class="fa-solid fa-clock"></i> Warning (<span th:text="${loggedUserWo.daysLeft} + 'd left'"></span>)</span>
+                <span th:if="${loggedUserWo.expiryStatus == 'OK'}" class="pill pill-ok"><i class="fa-solid fa-shield-halved"></i> Active (<span th:text="${loggedUserWo.daysLeft} + 'd left'"></span>)</span>
+                <a th:href="@{/workorder/updateFormWorkorder(woId=${loggedUserWo.id})}" class="user-wo-action" title="View or edit your work order"><i class="fas fa-edit"></i> Edit Mine</a>
+            </div>
         </header>
 
         <div class="content-layout">
@@ -355,6 +563,23 @@
             <aside class="form-side">
                 <div class="glass-card">
                     <h2 class="card-title"><i class="fas fa-file-contract"></i> Work Order Details</h2>
+
+                    <!-- Expiry status banner when editing existing work order -->
+                    <div th:if="${workorder.id != null and workorder.woToDate != null}" class="form-expiry-banner"
+                         th:classappend="${workorder.expiryStatus == 'EXPIRED' ? 'banner-expired' : (workorder.expiryStatus == 'CRITICAL' ? 'banner-critical' : (workorder.expiryStatus == 'WARNING' ? 'banner-warning' : 'banner-ok'))}">
+                        <div class="banner-icon">
+                            <i th:class="${workorder.expiryStatus == 'EXPIRED' ? 'fa-solid fa-circle-xmark' : (workorder.expiryStatus == 'CRITICAL' ? 'fa-solid fa-fire' : (workorder.expiryStatus == 'WARNING' ? 'fa-solid fa-clock' : 'fa-solid fa-shield-halved'))}"></i>
+                        </div>
+                        <div class="banner-text">
+                            <div class="banner-title" th:text="${workorder.expiryStatus == 'EXPIRED' ? 'Contract Expired' : (workorder.expiryStatus == 'CRITICAL' ? 'Critical: Expiring Soon' : (workorder.expiryStatus == 'WARNING' ? 'Contract Renewal Approaching' : 'Contract Active'))}"></div>
+                            <div class="banner-sub">
+                                <span th:if="${workorder.daysLeft < 0}" th:text="'Expired ' + ${-workorder.daysLeft} + ' days ago (' + ${#temporals.format(workorder.woToDate, 'dd MMM yyyy')} + ')'"></span>
+                                <span th:if="${workorder.daysLeft == 0}" th:text="'Expires today (' + ${#temporals.format(workorder.woToDate, 'dd MMM yyyy')} + ')'"></span>
+                                <span th:if="${workorder.daysLeft > 0}" th:text="${workorder.daysLeft} + ' days remaining until ' + ${#temporals.format(workorder.woToDate, 'dd MMM yyyy')}"></span>
+                            </div>
+                        </div>
+                    </div>
+
                     <form action="#" th:action="@{/workorder/saveWorkorder}" th:object="${workorder}" method="POST">
                         <input type="hidden" th:field="*{id}" />
 
@@ -389,7 +614,7 @@
                             <div class="form-group">
                                 <label class="form-label" for="projectNo">Project No</label>
                                 <input class="glass-input" type="text" id="projectNo" th:field="*{projectNo}" required
-                                    placeholder="PRJ-XXXX">
+                                    placeholder="SXXXX">
                             </div>
                         </div>
 
@@ -408,6 +633,7 @@
                             <div class="form-group">
                                 <label class="form-label" for="woToDate">To Date</label>
                                 <input class="glass-input" type="date" id="woToDate" th:field="*{woToDate}" required>
+                                <div id="dateExpiryFeedback" class="date-feedback" style="display: none;"></div>
                             </div>
                         </div>
 
@@ -429,9 +655,30 @@
             <!-- Right Side: Table -->
             <main class="table-side">
                 <div class="table-header-row">
-                    <h2 class="card-title" style="margin:0;"><i class="fas fa-list"></i> Active Work Orders</h2>
-                    <span style="color: var(--text-secondary); font-size: 0.8rem;"
-                        th:text="${#lists.size(wo_list)} + ' Records Found'"></span>
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                        <h2 class="card-title" style="margin:0;"><i class="fas fa-list"></i> Active Work Orders</h2>
+                        <span style="color: var(--text-secondary); font-size: 0.8rem;"
+                            th:text="${#lists.size(wo_list)} + ' Records Found'"></span>
+                    </div>
+
+                    <!-- Quick Expiry Filter Pills -->
+                    <div class="wo-filter-bar">
+                        <button type="button" class="filter-pill active" data-filter="all">
+                            All <strong th:text="${#lists.size(wo_list)}">0</strong>
+                        </button>
+                        <button type="button" class="filter-pill filter-exp" data-filter="EXPIRED" title="Show expired work orders">
+                            <i class="fa-solid fa-circle-xmark"></i> Expired <strong th:text="${expiredCount}">0</strong>
+                        </button>
+                        <button type="button" class="filter-pill filter-crit" data-filter="CRITICAL" title="Expiring within 30 days">
+                            <i class="fa-solid fa-fire"></i> Critical <strong th:text="${criticalCount}">0</strong>
+                        </button>
+                        <button type="button" class="filter-pill filter-warn" data-filter="WARNING" title="Expiring within 60 days">
+                            <i class="fa-solid fa-clock"></i> Warning <strong th:text="${warningCount}">0</strong>
+                        </button>
+                        <button type="button" class="filter-pill filter-ok" data-filter="OK" title="Healthy active work orders">
+                            <i class="fa-solid fa-shield-halved"></i> Healthy <strong th:text="${healthyCount}">0</strong>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="glass-card"
@@ -440,23 +687,30 @@
                         <table class="modern-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 40px;">#</th>
+                                    <th style="width: 36px;">#</th>
                                     <th>Employee</th>
                                     <th>Agency</th>
                                     <th>Project</th>
                                     <th>WO Number</th>
                                     <th>Designation</th>
-                                    <th style="width: 100px;">Join Date</th>
-                                    <th style="width: 150px;">Period</th>
+                                    <th style="width: 95px;">Join Date</th>
+                                    <th style="width: 130px;">Period</th>
+                                    <th style="width: 125px;">Expiry Status</th>
                                     <th>Combo</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="temp_wo, iterstat : ${wo_list}">
+                                <tr th:each="temp_wo, iterstat : ${wo_list}"
+                                    th:data-status="${temp_wo.expiryStatus}"
+                                    th:classappend="${temp_wo.expiryStatus == 'EXPIRED' ? 'row-expired' : (temp_wo.empId != null and loggedUser != null and temp_wo.empId.id == loggedUser.id ? 'row-you' : '')}">
                                     <td th:text="${iterstat.count}"
                                         style="color: var(--text-secondary); font-weight: 600;"></td>
-                                    <td th:text="${temp_wo.empId.first_name}" style="font-weight: 600;"></td>
+                                    <td>
+                                        <span th:text="${temp_wo.empId.first_name}" style="font-weight: 600;"></span>
+                                        <span th:if="${temp_wo.empId != null and loggedUser != null and temp_wo.empId.id == loggedUser.id}"
+                                              class="badge-you" title="Your work order">You</span>
+                                    </td>
                                     <td>
                                         <span
                                             th:text="${temp_wo.agency == 'AEOLOGIC' ? 'AEO' : (temp_wo.agency == 'AKAL' ? 'AKL' : temp_wo.agency)}"
@@ -473,7 +727,34 @@
                                             <span
                                                 th:text="${#temporals.format(temp_wo.woFromDate, 'dd-MM-yyyy')}"></span>
                                             <br><span style="color: var(--text-secondary);">to</span><br>
-                                            <span th:text="${#temporals.format(temp_wo.woToDate, 'dd-MM-yyyy')}"></span>
+                                            <span th:text="${#temporals.format(temp_wo.woToDate, 'dd-MM-yyyy')}"
+                                                  th:style="${temp_wo.isExpired() ? 'color: #f87171; font-weight: 600;' : ''}"></span>
+                                        </div>
+                                    </td>
+                                    <!-- Expiry Status Column -->
+                                    <td>
+                                        <div>
+                                            <span th:if="${temp_wo.expiryStatus == 'EXPIRED'}" class="pill pill-expired">
+                                                <i class="fa-solid fa-circle-xmark"></i> Expired
+                                            </span>
+                                            <span th:if="${temp_wo.expiryStatus == 'CRITICAL'}" class="pill pill-critical">
+                                                <i class="fa-solid fa-fire"></i> Critical
+                                            </span>
+                                            <span th:if="${temp_wo.expiryStatus == 'WARNING'}" class="pill pill-warning">
+                                                <i class="fa-solid fa-clock"></i> Warning
+                                            </span>
+                                            <span th:if="${temp_wo.expiryStatus == 'OK'}" class="pill pill-ok">
+                                                <i class="fa-solid fa-shield-halved"></i> Active
+                                            </span>
+                                            <span th:if="${temp_wo.expiryStatus == 'UNKNOWN'}" class="pill pill-unknown">
+                                                —
+                                            </span>
+                                            <div th:if="${temp_wo.daysLeft != null}" class="status-sub"
+                                                 th:classappend="${temp_wo.daysLeft < 0 ? 'sub-exp' : (temp_wo.daysLeft <= 30 ? 'sub-crit' : (temp_wo.daysLeft <= 60 ? 'sub-warn' : 'sub-ok'))}">
+                                                <span th:if="${temp_wo.daysLeft < 0}" th:text="'Expired ' + ${-temp_wo.daysLeft} + 'd ago'"></span>
+                                                <span th:if="${temp_wo.daysLeft == 0}">Expires today</span>
+                                                <span th:if="${temp_wo.daysLeft > 0}" th:text="${temp_wo.daysLeft} + ' days left'"></span>
+                                            </div>
                                         </div>
                                     </td>
                                     <td th:text="${temp_wo.comboLeaves}" style="text-align: center;"></td>
@@ -485,7 +766,7 @@
                                     </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(wo_list)}">
-                                    <td colspan="10"
+                                    <td colspan="11"
                                         style="text-align: center; padding: 3rem; color: var(--text-secondary);">
                                         <i class="fas fa-folder-open"
                                             style="font-size: 2rem; display: block; margin-bottom: 1rem; opacity: 0.5;"></i>
@@ -499,6 +780,75 @@
             </main>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Interactive Expiry Filter Pills
+            const filterButtons = document.querySelectorAll('.filter-pill');
+            const tableRows = document.querySelectorAll('.modern-table tbody tr[data-status]');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const filter = this.getAttribute('data-filter');
+                    tableRows.forEach(row => {
+                        const status = row.getAttribute('data-status');
+                        if (filter === 'all' || status === filter) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Dynamic To-Date Expiry feedback in the form
+            const toDateInput = document.getElementById('woToDate');
+            const feedbackEl = document.getElementById('dateExpiryFeedback');
+
+            function updateDateFeedback() {
+                if (!toDateInput || !feedbackEl) return;
+                const val = toDateInput.value;
+                if (!val) {
+                    feedbackEl.style.display = 'none';
+                    return;
+                }
+
+                const target = new Date(val + 'T00:00:00');
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const diffTime = target.getTime() - today.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                feedbackEl.style.display = 'flex';
+                if (diffDays < 0) {
+                    feedbackEl.className = 'date-feedback banner-expired';
+                    feedbackEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Date is expired (' + Math.abs(diffDays) + ' days ago)';
+                } else if (diffDays === 0) {
+                    feedbackEl.className = 'date-feedback banner-critical';
+                    feedbackEl.innerHTML = '<i class="fa-solid fa-fire"></i> Expires today';
+                } else if (diffDays <= 30) {
+                    feedbackEl.className = 'date-feedback banner-critical';
+                    feedbackEl.innerHTML = '<i class="fa-solid fa-fire"></i> Expiring soon (' + diffDays + ' days left)';
+                } else if (diffDays <= 60) {
+                    feedbackEl.className = 'date-feedback banner-warning';
+                    feedbackEl.innerHTML = '<i class="fa-solid fa-clock"></i> Expiring in ' + diffDays + ' days';
+                } else {
+                    feedbackEl.className = 'date-feedback banner-ok';
+                    feedbackEl.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Active (' + diffDays + ' days contract)';
+                }
+            }
+
+            if (toDateInput) {
+                toDateInput.addEventListener('input', updateDateFeedback);
+                toDateInput.addEventListener('change', updateDateFeedback);
+                updateDateFeedback();
+            }
+        });
+    </script>
 
 </div>
 

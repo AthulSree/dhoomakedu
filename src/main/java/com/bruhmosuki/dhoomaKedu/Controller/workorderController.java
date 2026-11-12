@@ -31,19 +31,14 @@ public class workorderController {
     @GetMapping("/manage")
     public String manageWo(Model theModel, HttpServletRequest request){
         theModel.addAttribute("panelName", "Work Order");
-        workorder theWorkorder = new workorder();
-        List<employee> emp_list = theEmployeeService.findAll();
-
         String userIp = theCommonServices.getUserIp(request);
         employee loggedUser = theEmployeeService.findBySysIp(userIp);
-        if(!loggedUser.getIs_admin()){
+        if(loggedUser == null || !loggedUser.getIs_admin()){
             return "onlyAdminError";
         }
 
-        List<workorder> workorderList = theWorkorderService.findAll();
-        theModel.addAttribute("workorder",theWorkorder);
-        theModel.addAttribute("emp_list",emp_list);
-        theModel.addAttribute("wo_list",workorderList);
+        workorder theWorkorder = new workorder();
+        populateModel(theModel, theWorkorder, loggedUser);
         return "workorder";
     }
 
@@ -60,13 +55,38 @@ public class workorderController {
     }
 
     @GetMapping("/updateFormWorkorder")
-    public String updateWo(@RequestParam("woId") int theWoId, Model theModel){
+    public String updateWo(@RequestParam("woId") int theWoId, Model theModel, HttpServletRequest request){
+        theModel.addAttribute("panelName", "Work Order");
+        String userIp = theCommonServices.getUserIp(request);
+        employee loggedUser = theEmployeeService.findBySysIp(userIp);
+        if(loggedUser == null || !loggedUser.getIs_admin()){
+            return "onlyAdminError";
+        }
+
         workorder theWorkorder = theWorkorderService.findById(theWoId);
+        populateModel(theModel, theWorkorder, loggedUser);
+        return "workorder";
+    }
+
+    private void populateModel(Model theModel, workorder currentWorkorder, employee loggedUser) {
         List<workorder> workorderList = theWorkorderService.findAll();
         List<employee> emp_list = theEmployeeService.findAll();
-        theModel.addAttribute("workorder",theWorkorder);
-        theModel.addAttribute("emp_list",emp_list);
-        theModel.addAttribute("wo_list",workorderList);
-        return "workorder";
+
+        long expiredCount = workorderList.stream().filter(w -> "EXPIRED".equals(w.getExpiryStatus())).count();
+        long criticalCount = workorderList.stream().filter(w -> "CRITICAL".equals(w.getExpiryStatus())).count();
+        long warningCount = workorderList.stream().filter(w -> "WARNING".equals(w.getExpiryStatus())).count();
+        long healthyCount = workorderList.stream().filter(w -> "OK".equals(w.getExpiryStatus())).count();
+
+        workorder loggedUserWo = (loggedUser != null) ? theWorkorderService.findByEmpId(loggedUser) : null;
+
+        theModel.addAttribute("workorder", currentWorkorder);
+        theModel.addAttribute("emp_list", emp_list);
+        theModel.addAttribute("wo_list", workorderList);
+        theModel.addAttribute("loggedUser", loggedUser);
+        theModel.addAttribute("loggedUserWo", loggedUserWo);
+        theModel.addAttribute("expiredCount", expiredCount);
+        theModel.addAttribute("criticalCount", criticalCount);
+        theModel.addAttribute("warningCount", warningCount);
+        theModel.addAttribute("healthyCount", healthyCount);
     }
 }
